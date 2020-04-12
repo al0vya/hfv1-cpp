@@ -13,6 +13,9 @@
 #include "frictionImplicit.h"
 #include "uFaceValues.h"
 #include "fluxHLL.h"
+#include "myPowInt.h"
+#include "encodeDetail.h"
+#include "encodeScale.h"
 
 using namespace std;
 
@@ -24,7 +27,7 @@ int main()
 	int step = 0;
 
 	SimulationParameters simulationParameters;
-	simulationParameters.cells = 100;
+	simulationParameters.cells = 2;
 	simulationParameters.xmin = 0;
 	simulationParameters.xmax = 50;
 	simulationParameters.simulationTime = C(20.);
@@ -34,10 +37,11 @@ int main()
 	solverParameters.CFL = C(0.33);
 	solverParameters.tolDry = C(1e-3);
 	solverParameters.g = C(9.80665);
+	solverParameters.L = 7;
 
 	BoundaryConditions bcs;
 	bcs.hl = C(6.0);
-	bcs.hr = C(0.0);
+	bcs.hr = C(1.0);
 
 	bcs.ql = C(0.0);
 	bcs.qr = C(0.0);
@@ -51,324 +55,242 @@ int main()
 	bcs.hImposedDown = C(0.0);
 	bcs.qxImposedDown = C(0.0);
 
-	// coarsest cell size
-	real dx = (simulationParameters.xmax - simulationParameters.xmin) / simulationParameters.cells;
+	real dxCoarse = (simulationParameters.xmax - simulationParameters.xmin) / simulationParameters.cells;
+	real dxFine = dxCoarse / myPowInt(2, solverParameters.L);
+	solverParameters.epsilon = dxFine / 2;
 
-	// allocate buffer for interfaces
-	real* x_int = new real[simulationParameters.cells + 1];
+	// number of cells/interfaces at finest resolution
+	int cellsFine = simulationParameters.cells * myPowInt(2, solverParameters.L);
+	int interfacesFine = cellsFine + 1;
 
-	// initialise baseline mesh
-	for (i = 0; i < simulationParameters.cells + 1; i++)
+	real* xIntFine = new real[interfacesFine];
+	real* qIntFine = new real[interfacesFine];
+	real* hIntFine = new real[interfacesFine];
+	real* zIntFine = new real[interfacesFine];
+
+	// initialise finest mesh and flow nodes
+	for (i = 0; i < interfacesFine; i++)
 	{
-		x_int[i] = simulationParameters.xmin + i * dx;
+		xIntFine[i] = simulationParameters.xmin + i * dxFine;
+		zIntFine[i] = bedDataConservative(xIntFine[i]);
+		hIntFine[i] = hInitial(bcs, zIntFine[i], xIntFine[i]);
+		qIntFine[i] = qInitial(bcs, xIntFine[i]);
 	}
 
-	// allocate buffers for flow nodes
-	real* q_int = new real[simulationParameters.cells + 1];
-	real* h_int = new real[simulationParameters.cells + 1];
-	real* z_int = new real[simulationParameters.cells + 1];
+	real* qScaleFine = new real[cellsFine];
+	real* hScaleFine = new real[cellsFine];
+	real* zScaleFine = new real[cellsFine];
+	real* etaScaleFine = new real[cellsFine];
 
-	// initial interface values
-	for (i = 0; i < simulationParameters.cells + 1; i++)
+	real qMax = 0;
+	real zMax = 0;
+	real etaMax = 0;
+
+	// finest scale coefficients and maximums
+	for (i = 0; i < cellsFine; i++)
 	{
-		z_int[i] = bedDataConservative(x_int[i]);
-		h_int[i] = hInitial(bcs, z_int[i], x_int[i]);
-		q_int[i] = qInitial(bcs, x_int[i]);
+		qScaleFine[i] = (qIntFine[i] + qIntFine[i + 1]) / 2;
+		hScaleFine[i] = (hIntFine[i] + hIntFine[i + 1]) / 2;
+		zScaleFine[i] = (zIntFine[i] + zIntFine[i + 1]) / 2;
+		etaScaleFine[i] = zScaleFine[i] + hScaleFine[i];
+
+		qMax = max(qMax, abs(qScaleFine[i]));
+		zMax = max(zMax, abs(zScaleFine[i]));
+		etaMax = max(etaMax, abs(etaScaleFine[i]));
 	}
 
-	// allocate buffers for flow modes with ghost BCs
-	real* qWithBC = new real[simulationParameters.cells + 2];
-	real* hWithBC = new real[simulationParameters.cells + 2];
-	real* zWithBC = new real[simulationParameters.cells + 2];
+	int scaleCoeffsPerCell = myPowInt(2, solverParameters.L + 1) - 1;
+	real* qScaleFlattened = new real[simulationParameters.cells * scaleCoeffsPerCell];
+	real* etaScaleFlattened = new real[simulationParameters.cells * scaleCoeffsPerCell];
+	real* zScaleFlattened = new real[simulationParameters.cells * scaleCoeffsPerCell];
+	
+	real* qScaleCoarse = new real[simulationParameters.cells];
+	real* etaScaleCoarse = new real[simulationParameters.cells];
+	real* zScaleCoarse = new real[simulationParameters.cells];
 
-	// project to find the modes
-	for (int i = 1; i < simulationParameters.cells + 1; i++)
+	int detailsPerCell = myPowInt(2, solverParameters.L) - 1;
+	real* qDetailsFlattened = new real[simulationParameters.cells * detailsPerCell];
+	real* etaDetailsFlattened = new real[simulationParameters.cells * detailsPerCell];
+	real* zDetailsFlattened = new real[simulationParameters.cells * detailsPerCell];
+
+	// START ENCODING SCALE AND DETAIL COEFFICIENTS //
+
+	for (int c = 0; c < simulationParameters.cells; c++)
 	{
-		qWithBC[i] = (q_int[i - 1] + q_int[i]) / 2;
-		hWithBC[i] = (h_int[i - 1] + h_int[i]) / 2;
-		zWithBC[i] = (z_int[i - 1] + z_int[i]) / 2;
+		for (int k = 0; k < myPowInt(2, solverParameters.L); k++)
+		{
+			qScaleFlattened[c * scaleCoeffsPerCell + myPowInt(2, solverParameters.L) - 1 + k] = qScaleFine[c * myPowInt(2, solverParameters.L) + k];
+			etaScaleFlattened[c * scaleCoeffsPerCell + myPowInt(2, solverParameters.L) - 1 + k] = etaScaleFine[c * myPowInt(2, solverParameters.L) + k];
+			zScaleFlattened[c * scaleCoeffsPerCell + myPowInt(2, solverParameters.L) - 1 + k] = zScaleFine[c * myPowInt(2, solverParameters.L) + k];
+		}
+
+		for (int n = solverParameters.L - 1; n >= 0; n--)
+		{
+			int minLevIdx = myPowInt(2, n) - 1;
+			int maxLevIdx = myPowInt(2, n + 1) - 2;
+			int kHigher = myPowInt(2, n + 1) - 1; // index of child element
+
+			for (int k = minLevIdx; k <= maxLevIdx; k++)
+			{
+				// get child elements
+				real q1 = qScaleFlattened[c * scaleCoeffsPerCell + kHigher];
+				real eta1 = etaScaleFlattened[c * scaleCoeffsPerCell + kHigher];
+				real z1 = zScaleFlattened[c * scaleCoeffsPerCell + kHigher];
+				
+				real q2 = qScaleFlattened[c * scaleCoeffsPerCell + kHigher + 1];
+				real eta2 = etaScaleFlattened[c * scaleCoeffsPerCell + kHigher + 1];
+				real z2 = zScaleFlattened[c * scaleCoeffsPerCell + kHigher + 1];
+
+				qScaleFlattened[c * scaleCoeffsPerCell + k] = encodeScale(q1, q2);
+				etaScaleFlattened[c * scaleCoeffsPerCell + k] = encodeScale(eta1, eta2);
+				zScaleFlattened[c * scaleCoeffsPerCell + k] = encodeScale(z1, z2);
+
+				qDetailsFlattened[c * detailsPerCell + k] = encodeDetail(q1, q2);
+				etaDetailsFlattened[c * detailsPerCell + k] = encodeDetail(eta1, eta2);
+				zDetailsFlattened[c * detailsPerCell + k] = encodeDetail(z1, z2);
+
+				kHigher += 2; // increment by two to step along both of the child elements
+			}
+		}
+
+		qScaleCoarse[c] = qScaleFlattened[c * scaleCoeffsPerCell];
+		etaScaleCoarse[c] = etaScaleFlattened[c * scaleCoeffsPerCell];
+		zScaleCoarse[c] = zScaleFlattened[c * scaleCoeffsPerCell];
 	}
 
-	// allocate true/false buffer for dry cells
-	bool* dry = new bool[simulationParameters.cells + 2];
+	// END ENCODING SCALE AND DETAIL COEFFICIENTS //
 
-	real* etaTemp = new real[simulationParameters.cells + 2];
+	real* normalisedDetails = new real[simulationParameters.cells * detailsPerCell];
 
-	// allocating buffers for eastern and western interface values
-	real* qEast = new real[simulationParameters.cells + 1];
-	real* hEast = new real[simulationParameters.cells + 1];
-	real* etaEast = new real[simulationParameters.cells + 1];
-
-	real* qWest = new real[simulationParameters.cells + 1];
-	real* hWest = new real[simulationParameters.cells + 1];
-	real* etaWest = new real[simulationParameters.cells + 1];
-
-	// allocating buffers for positivity preserving nodes
-	real* qEastStar = new real[simulationParameters.cells + 1];
-	real* hEastStar = new real[simulationParameters.cells + 1];
-
-	real* qWestStar = new real[simulationParameters.cells + 1];
-	real* hWestStar = new real[simulationParameters.cells + 1];
-
-	real* zStarIntermediate = new real[simulationParameters.cells + 1];
-	real* zStar = new real[simulationParameters.cells + 1];
-	 
-	real* uWest = new real[simulationParameters.cells + 1];
-	real* uEast = new real[simulationParameters.cells + 1];
-
-	real* delta = new real[simulationParameters.cells + 1];
-
-	// allocating buffers for numerical fluxes from HLL solver
-	real* massFlux = new real[simulationParameters.cells + 1];
-	real* momentumFlux = new real[simulationParameters.cells + 1];
-
-	// allocating buffers for positivity preserving MODES
-	real* hBar = new real[simulationParameters.cells];
-	real* zBar = new real[simulationParameters.cells];
-
-	real timeNow = 0;
-	real dt = C(1e-4);
-
-	while (timeNow < simulationParameters.simulationTime)
+	for (i = 0; i < simulationParameters.cells * detailsPerCell; i++)
 	{
-		timeNow += dt;
-		
-		if (timeNow - simulationParameters.simulationTime > 0)
-		{
-			timeNow -= dt;
-			dt = simulationParameters.simulationTime - timeNow;
-			timeNow += dt;
-		}
+		qMax != 0 ? qDetailsFlattened[i] /= qMax : qDetailsFlattened[i];
+		etaMax != 0 ? etaDetailsFlattened[i] /= etaMax : etaDetailsFlattened[i];
+		zMax != 0 ? zDetailsFlattened[i] /= zMax : zDetailsFlattened[i];
 
-		// adding ghost boundary conditions
-		real qUp = bcs.reflectUp * qWithBC[1];
-		if (bcs.qxImposedUp > 0)
-		{
-			qUp = bcs.qxImposedUp;
-		}
-
-		real qDown = bcs.reflectDown * qWithBC[simulationParameters.cells];
-		if (bcs.qxImposedDown > 0)
-		{
-			qDown = bcs.qxImposedDown;
-		}
-
-		qWithBC[0] = qUp;
-		qWithBC[simulationParameters.cells + 1] = qDown; // recall there are cells + 2 elements inc BCs
-
-		real hUp = hWithBC[1];
-		if (bcs.hImposedUp > 0)
-		{
-			hUp = bcs.hImposedUp;
-		}
-
-		real hDown = hWithBC[simulationParameters.cells];
-		if (bcs.hImposedDown > 0)
-		{
-			hDown = bcs.hImposedDown;
-		}
-
-		hWithBC[0] = hUp;
-		hWithBC[simulationParameters.cells + 1] = hDown;
-
-		real zUp = zWithBC[1];
-		real zDown = zWithBC[simulationParameters.cells];
-
-		zWithBC[0] = zUp;
-		zWithBC[simulationParameters.cells + 1] = zDown;
-
-		// extract upwind and downwind modes
-		real hWestUpwind = hWithBC[0];
-		real qWestUpwind = qWithBC[0];
-
-		real hEastDownwind = hWithBC[simulationParameters.cells + 1];
-		real qEastDownwind = qWithBC[simulationParameters.cells + 1];
-
-		if (simulationParameters.manning > 0)
-		{
-			for (i = 1; i < simulationParameters.cells + 1; i++)
-			{
-				qWithBC[i] += frictionImplicit(simulationParameters, solverParameters, dt, hWithBC[i], qWithBC[i]);
-			}
-		}
-
-		// ghost cells are always 0 i.e. false/wet
-		dry[0] = false;
-		dry[simulationParameters.cells + 1] = false;
-
-		// initialising dry vs wet cells, ignore ghost cells
-		for (i = 1; i < simulationParameters.cells + 1; i++)
-		{
-			real hLocal = hWithBC[i];
-			real hBackward = hWithBC[i - 1];
-			real hForward = hWithBC[i + 1];
-
-			real hMax = max(hLocal, hBackward);
-			hMax = max(hForward, hMax);
-
-			// dry[] hasn't been initialised so else statement also needed
-			if (hMax <= solverParameters.tolDry)
-			{
-				dry[i] = true;
-			}
-			else
-			{
-				dry[i] = false;
-			}
-		}
-
-		for (i = 0; i < simulationParameters.cells + 2; i++)
-		{
-			etaTemp[i] = hWithBC[i] + zWithBC[i];
-		}
-
-		// initialising interface values
-		for (i = 0; i < simulationParameters.cells + 1; i++)
-		{
-			qEast[i] = qWithBC[i + 1];
-			hEast[i] = hWithBC[i + 1];
-			etaEast[i] = etaTemp[i + 1];
-
-			qWest[i] = qWithBC[i];
-			hWest[i] = hWithBC[i];
-			etaWest[i] = etaTemp[i];
-		}
-
-		// correcting downwind and upwind eta values
-		etaEast[simulationParameters.cells] = etaTemp[simulationParameters.cells] - hWithBC[simulationParameters.cells] + hEastDownwind;
-		etaWest[0] = etaTemp[1] - hWithBC[1] + hWestUpwind;
-
-		for (int i = 0; i < simulationParameters.cells + 1; i++)
-		{
-			// initialising velocity interface values
-			uWest[i] = uFaceValues(solverParameters, qWest[i], hWest[i]);
-			uEast[i] = uFaceValues(solverParameters, qEast[i], hEast[i]);
-
-			// intermediate calculations
-			real a = etaWest[i] - hWest[i];
-			real b = etaEast[i] - hEast[i];
-			zStarIntermediate[i] = max(a, b);
-			a = etaWest[i] - zStarIntermediate[i];
-			b = etaEast[i] - zStarIntermediate[i];
-
-			// positivity-preserving nodes
-			hWestStar[i] = max(C(0.0), a);
-			hEastStar[i] = max(C(0.0), b);
-
-			delta[i] = max(C(0.0), -a) + max(C(0.0), -b);
-
-			qWestStar[i] = uWest[i] * hWestStar[i];
-			qEastStar[i] = uEast[i] * hEastStar[i];
-
-			zStar[i] = zStarIntermediate[i] - delta[i];
-		}
-
-		// initialising numerical fluxes
-		fluxHLL(simulationParameters, solverParameters, hWestStar, hEastStar, qWestStar, qEastStar, uWest, uEast, massFlux, momentumFlux);
-
-		for (int i = 0; i < simulationParameters.cells; i++)
-		{
-			// essentially 0th order projection but taking into account east/west locality
-			hBar[i] = (hEastStar[i] + hWestStar[i + 1]) / 2;
-
-			// first order projection
-			zBar[i] = (zStar[i + 1] - zStar[i]) / (2 * sqrt(C(3.0)));
-		}
-
-		// FV1 operator increment, skip ghosts cells
-		for (i = 1; i < simulationParameters.cells + 1; i++)
-		{
-			// skip increment in dry cells
-			if (dry[i])
-			{
-				continue;
-			}
-			else
-			{
-				real massIncrement = -(1 / dx) * (massFlux[i] - massFlux[i - 1]);
-				real momentumIncrement = -(1 / dx) * (momentumFlux[i] - momentumFlux[i - 1] + 2 * sqrt(C(3.0)) * solverParameters.g * hBar[i - 1] * zBar[i - 1]);
-
-				hWithBC[i] += dt * massIncrement;
-				qWithBC[i] += dt * momentumIncrement;
-			}
-
-			if (hWithBC[i] <= solverParameters.tolDry)
-			{
-				qWithBC[i] = 0;
-			}
-		}
-
-		// CFL time step adjustment
-		dt = 1e9;
-
-		for (i = 1; i < simulationParameters.cells + 1; i++)
-		{
-			if (hWithBC[i] <= solverParameters.tolDry)
-			{
-				continue;
-			}
-			else
-			{
-				real u = qWithBC[i] / hWithBC[i];
-				real dtCFL = solverParameters.CFL * dx / (abs(u) + sqrt(solverParameters.g * hWithBC[i]));
-				dt = min(dt, dtCFL);
-			}
-		}
-
-		step++;
-		
-		//printf("%f s\n", timeNow);
+		real a = max(qDetailsFlattened[i], etaDetailsFlattened[i]);
+		normalisedDetails[i] = max(a, zDetailsFlattened[i]);
 	}
 
-	for (i = 1; i < simulationParameters.cells + 1; i++)
+	bool* significantDetails = new bool[simulationParameters.cells * detailsPerCell]();
+
+	// START PREDICTION //
+	
+	for (int c = 0; c < simulationParameters.cells; c++)
 	{
-		printf("%0.2f\n", hWithBC[i] + zWithBC[i]);
+		for (int n = 0; n < solverParameters.L; n++)
+		{
+			int minLevIdx = myPowInt(2, n) - 1;
+			int maxLevIdx = myPowInt(2, n + 1) - 2;
+			int kHigher = myPowInt(2, n + 1) - 1; // index of child element
+
+			for (int k = minLevIdx; k <= maxLevIdx; k++)
+			{
+				if (normalisedDetails[c * detailsPerCell + k] > solverParameters.epsilon * pow(C(2.0), n - solverParameters.L))
+				{
+					significantDetails[c * detailsPerCell + k] = true;
+
+					if (c + 1 < simulationParameters.cells && k == maxLevIdx) // if it's not the last cell and at the right-most edge
+					{
+						significantDetails[(c + 1) * detailsPerCell + minLevIdx] = true; // make the subelement to the right cell also significant
+					}
+
+					if (c > 0 && k == minLevIdx) // if it's not the first cell and at the left-most edge
+					{
+						significantDetails[(c - 1) * detailsPerCell + maxLevIdx] = true; // the subelement on the left cell is also significant
+					}
+				}
+			}
+		}
 	}
 
-	printf("\n");
+	// END PREDICTION //
+
+
+
+	// START REGULARISATION //
+
+	for (int c = 0; c < simulationParameters.cells; c++)
+	{
+		for (int n = solverParameters.L; n > 1; n--)
+		{
+			int k = myPowInt(2, n - 1) - 1;
+			int kLower = myPowInt(2, n - 2) - 1;
+
+			while (k < myPowInt(2, n) - 2)
+			{
+				if (significantDetails[c * detailsPerCell + k] || significantDetails[c * detailsPerCell + k + 1])
+				{
+					significantDetails[c * detailsPerCell + kLower] = true;
+				}
+
+				k += 2; // step along two child subelements
+				kLower++; // step along only the one parent element
+			}
+		}
+	}
+
+	// END REGULARISATION //
+
+
+	// START EXTRA SIGNIFICANCE //
+
+	for (int c = 0; c < simulationParameters.cells; c++)
+	{
+		for (int n = 0; n < solverParameters.L; n++)
+		{
+			int minLevIdx = myPowInt(2, n) - 1;
+			int maxLevIdx = myPowInt(2, n + 1) - 2;
+			int kHigher = myPowInt(2, n + 1) - 1; // index of child element
+
+			for (int k = minLevIdx; k <= maxLevIdx; k++)
+			{
+				if (significantDetails[c * detailsPerCell + k])
+				{
+					real mBar = 1.5;
+					real epsilonLocal = solverParameters.epsilon * pow(C(2.0), n - solverParameters.L);
+
+					if (normalisedDetails[c * detailsPerCell + k] >= epsilonLocal * pow(2, mBar + 1) && n + 1 != solverParameters.L)
+					{
+						// if extra signficant child elements marked as active
+						significantDetails[c * detailsPerCell + kHigher] = true;
+						significantDetails[c * detailsPerCell + kHigher + 1] = true;
+					}
+				}
+
+				kHigher += 2;
+			}
+		}
+	}
+
+	// END EXTRA SIGNIFICANCE //
 
 	// delete buffers
-	delete[] x_int;
+	delete[] xIntFine;
+	delete[] qIntFine;
+	delete[] hIntFine;
+	delete[] zIntFine;
 
-	delete[] q_int;
-	delete[] h_int;
-	delete[] z_int;
+	delete[] qScaleFine;
+	delete[] hScaleFine;
+	delete[] zScaleFine;
+	delete[] etaScaleFine;
 
-	delete[] qWithBC;
-	delete[] hWithBC;
-	delete[] zWithBC;
+	delete[] qScaleFlattened;
+	delete[] etaScaleFlattened;
+	delete[] zScaleFlattened;
 
-	delete[] dry;
+	delete[] qScaleCoarse;
+	delete[] etaScaleCoarse;
+	delete[] zScaleCoarse;
 
-	delete[] etaTemp;
+	delete[] qDetailsFlattened;
+	delete[] etaDetailsFlattened;
+	delete[] zDetailsFlattened;
 
-	delete[] qEast;
-	delete[] hEast;
-	delete[] etaEast;
+	delete[] normalisedDetails;
 
-	delete[] qWest;
-	delete[] hWest;
-	delete[] etaWest;
-
-	delete[] qWestStar;
-	delete[] hWestStar;
-
-	delete[] qEastStar;
-	delete[] hEastStar;
-
-	delete[] zStarIntermediate;
-	delete[] zStar;
-
-	delete[] uWest;
-	delete[] uEast;
-
-	delete[] delta;
-
-	delete[] massFlux;
-	delete[] momentumFlux;
-
-	delete[] hBar;
-	delete[] zBar;
+	delete[] significantDetails;
 
 	return 0;
 }

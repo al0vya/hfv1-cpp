@@ -10,4 +10,5 @@ typedef struct SimulationParameters
 	real simulationTime;
 
 	real manning;
+
 } SimulationParameters;
