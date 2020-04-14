@@ -8,4 +8,4 @@ using namespace std;
 #include "SimulationParameters.h"
 #include "SolverParameters.h"
 
-void fluxHLL(SimulationParameters simulationParameters, SolverParameters solverParameters, real* hWestStar, real* hEastStar, real* qWestStar, real* qEastStar, real* uWest, real* uEast, real* massFlux, real* momentumFlux);
+void fluxHLL(int assembledSolutionLength, SolverParameters solverParameters, real* hWestStar, real* hEastStar, real* qWestStar, real* qEastStar, real* uWest, real* uEast, real* massFlux, real* momentumFlux);

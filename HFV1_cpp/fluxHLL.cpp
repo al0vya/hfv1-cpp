@@ -1,10 +1,10 @@
 #include "fluxHLL.h"
 
-void fluxHLL(SimulationParameters simulationParameters, SolverParameters solverParameters, real* hWestStar, real* hEastStar, real* qWestStar, real* qEastStar, real* uWest, real* uEast, real* massFlux, real* momentumFlux)
+void fluxHLL(int assembledSolutionLength, SolverParameters solverParameters, real* hWestStar, real* hEastStar, real* qWestStar, real* qEastStar, real* uWest, real* uEast, real* massFlux, real* momentumFlux)
 {
 	real aL, aR, hStar, uStar, aStar, sL, sR, massFL, massFR, momentumFL, momentumFR;
 
-	for (int i = 0; i < simulationParameters.cells + 1; i++)
+	for (int i = 0; i < assembledSolutionLength + 1; i++)
 	{
 		if (hWestStar[i] <= solverParameters.tolDry && hEastStar[i] <= solverParameters.tolDry)
 		{
