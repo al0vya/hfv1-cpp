@@ -34,17 +34,17 @@ int main()
 	int i;
 
 	SimulationParameters simulationParameters;
-	simulationParameters.cells = 10;
+	simulationParameters.cells = 2;
 	simulationParameters.xmin = 0;
 	simulationParameters.xmax = 50;
-	simulationParameters.simulationTime = C(500.0);
+	simulationParameters.simulationTime = C(1000.);
 	simulationParameters.manning = C(0.02);
 	
 	SolverParameters solverParameters;
 	solverParameters.CFL = C(0.33);
 	solverParameters.tolDry = C(1e-3);
 	solverParameters.g = C(9.80665);
-	solverParameters.L = 5;
+	solverParameters.L = 9;
 
 	BoundaryConditions bcs;
 	bcs.hl = C(6.0);
@@ -175,6 +175,11 @@ int main()
 	}
 
 	// END ENCODING SCALE AND DETAIL COEFFICIENTS //
+
+	while (i < 100)
+	{
+		i++;
+	}
 
 	real timeNow = 0;
 	real dt = C(1e-4);
@@ -540,7 +545,7 @@ int main()
 			qWithBC[i + 1] = qAdaptive[i];
 			hWithBC[i + 1] = etaAdaptive[i] - zAdaptive[i];
 			zWithBC[i + 1] = zAdaptive[i];
-			dxLocalWithBC[i + 1] = xSorted[i];
+			dxLocalWithBC[i + 1] = dxAdaptive[i];
 		}
 
 		// allocate true/false buffer for dry cells
@@ -748,9 +753,17 @@ int main()
 
 		for (i = 1; i < assembledSolutionLength + 1; i++)
 		{
-			printf("%.2f, ", hWithBC[i] + zWithBC[i]);
+			printf("%0.2f, ", hWithBC[i] + zWithBC[i]);
 		}
 		printf("\n");
+
+		/*for (i = 1; i < assembledSolutionLength + 1; i++)
+		{
+			printf("%0.2f, ", dxLocalWithBC[i]);
+		}
+		printf("\n");*/
+
+		printf("%f s\n", timeNow);
 
 		delete[] qScaleFlattened;
 		delete[] etaScaleFlattened;
@@ -783,9 +796,9 @@ int main()
 			etaScaleFlattened[activeIndices[i]] = eta;
 			zScaleFlattened[activeIndices[i]] = z;
 
-			qMax = max(q, qMax);
-			etaMax = max(eta, etaMax);
-			zMax = max(z, zMax);
+			qMax = max(qMax, abs(q));
+			etaMax = max(etaMax, abs(eta));
+			zMax = max(zMax, abs(z));
 		}
 
 		
@@ -833,29 +846,6 @@ int main()
 		}
 
 		// END ENCODING //
-
-		//for (int c = 0; c < simulationParameters.cells; c++)
-		//{
-		//	int detailStep = c * detailsPerCell;
-
-		//	for (int n = solverParameters.L - 1; n >= 0; n--)
-		//	{
-		//		int minLevIdx = myPowInt(2, n) - 1;
-		//		int maxLevIdx = myPowInt(2, n + 1) - 2;
-		//		int kHigher = maxLevIdx + 1; // index of child element
-
-		//		for (int k = minLevIdx; k <= maxLevIdx; k++)
-		//		{
-		//			printf(" %d |", significantDetails[detailStep + k] ? 1 : 0);
-		//		}
-
-		//		printf("\n");
-		//	}
-
-		//	printf("\n");
-		//}
-
-		printf("%f s\n", timeNow);
 
 		delete[] significantDetails;
 
