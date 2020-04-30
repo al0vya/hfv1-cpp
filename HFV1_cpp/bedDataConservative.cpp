@@ -26,6 +26,6 @@ real bedDataConservative(real x_int)
 		b = 0; // this is safe because you're casting an int literal to a real
 	}
 
-	return 0;
-	//return b * 10;
+	//return 0;
+	return b * 10;
 }

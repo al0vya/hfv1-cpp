@@ -32,6 +32,7 @@ int main()
 {
 	// quintessential for-loop index
 	int i;
+	int steps = 0;
 
 	SimulationParameters simulationParameters;
 	simulationParameters.cells = 2;
@@ -44,11 +45,11 @@ int main()
 	solverParameters.CFL = C(0.33);
 	solverParameters.tolDry = C(1e-3);
 	solverParameters.g = C(9.80665);
-	solverParameters.L = 9;
+	solverParameters.L = 5;
 
 	BoundaryConditions bcs;
 	bcs.hl = C(6.0);
-	bcs.hr = C(0.0);
+	bcs.hr = C(6.0);
 
 	bcs.ql = C(0.0);
 	bcs.qr = C(0.0);
@@ -63,12 +64,12 @@ int main()
 	bcs.qxImposedDown = C(0.0);
 
 	real dxCoarse = (simulationParameters.xmax - simulationParameters.xmin) / simulationParameters.cells;
-	real dxFine = dxCoarse / myPowInt(2, solverParameters.L);
+	real dxFine = dxCoarse / (1 << solverParameters.L);
 
 	solverParameters.epsilon = dxFine / 2;
 
 	// number of cells/interfaces at finest resolution
-	int cellsFine = simulationParameters.cells * myPowInt(2, solverParameters.L);
+	int cellsFine = simulationParameters.cells * (1 << solverParameters.L);
 	int interfacesFine = cellsFine + 1;
 
 	real* xIntFine = new real[interfacesFine];
@@ -90,106 +91,189 @@ int main()
 	real* zScaleFine = new real[cellsFine];
 	real* etaScaleFine = new real[cellsFine];
 
-	real qMax = 0;
-	real zMax = 0;
-	real etaMax = 0;
-
 	// finest scale coefficients and maximums
 	for (i = 0; i < cellsFine; i++)
 	{
-		qScaleFine[i] = (qIntFine[i] + qIntFine[i + 1]) / 2;
+		qScaleFine[i] = (qIntFine[i] + qIntFine[i + 1]) / C(2.0);
 		hScaleFine[i] = (hIntFine[i] + hIntFine[i + 1]) / 2;
 		zScaleFine[i] = (zIntFine[i] + zIntFine[i + 1]) / 2;
 		etaScaleFine[i] = zScaleFine[i] + hScaleFine[i];
-
-		qMax = max(qMax, abs(qScaleFine[i]));
-		zMax = max(zMax, abs(zScaleFine[i]));
-		etaMax = max(etaMax, abs(etaScaleFine[i]));
 	}
 
-	int scaleCoeffsPerCell = myPowInt(2, solverParameters.L + 1) - 1;
+	int scaleCoeffsPerCell = (1 << (solverParameters.L + 1)) - 1;
 	int totalScaleCoeffs = scaleCoeffsPerCell * simulationParameters.cells;
 
-	real* qScaleFlattened = new real[totalScaleCoeffs];
-	real* etaScaleFlattened = new real[totalScaleCoeffs];
-	real* zScaleFlattened = new real[totalScaleCoeffs];
+	real* qScaleFlattened = new real[totalScaleCoeffs]();
+	real* etaScaleFlattened = new real[totalScaleCoeffs]();
+	real* zScaleFlattened = new real[totalScaleCoeffs]();
 	
 	real* qScaleCoarse = new real[simulationParameters.cells];
 	real* etaScaleCoarse = new real[simulationParameters.cells];
 	real* zScaleCoarse = new real[simulationParameters.cells];
 
-	int detailsPerCell = myPowInt(2, solverParameters.L) - 1;
+	int detailsPerCell = (1 << solverParameters.L) - 1;
 	int totalDetails = detailsPerCell * simulationParameters.cells;
 
-	real* qDetailsFlattened = new real[totalDetails];
-	real* etaDetailsFlattened = new real[totalDetails];
-	real* zDetailsFlattened = new real[totalDetails];
-
-	// START ENCODING SCALE AND DETAIL COEFFICIENTS //
-
+	// loading the fine scale data
 	for (int c = 0; c < simulationParameters.cells; c++)
 	{
 		int scaleStep = c * scaleCoeffsPerCell;
 		int detailStep = c * detailsPerCell;
 
-		// loading the fine scale data
-		for (int k = 0; k < myPowInt(2, solverParameters.L); k++)
+		for (int k = 0; k < (1 << solverParameters.L); k++)
 		{
-			qScaleFlattened[scaleStep + myPowInt(2, solverParameters.L) - 1 + k] = qScaleFine[c * myPowInt(2, solverParameters.L) + k];
-			etaScaleFlattened[scaleStep + myPowInt(2, solverParameters.L) - 1 + k] = etaScaleFine[c * myPowInt(2, solverParameters.L) + k];
-			zScaleFlattened[scaleStep + myPowInt(2, solverParameters.L) - 1 + k] = zScaleFine[c * myPowInt(2, solverParameters.L) + k];
+			qScaleFlattened[scaleStep + (1 << solverParameters.L) - 1 + k] = qScaleFine[c * (1 << solverParameters.L) + k];
+			etaScaleFlattened[scaleStep + (1 << solverParameters.L) - 1 + k] = etaScaleFine[c * (1 << solverParameters.L) + k];
+			zScaleFlattened[scaleStep + (1 << solverParameters.L) - 1 + k] = zScaleFine[c * (1 << solverParameters.L) + k];
 		}
-
-		for (int n = solverParameters.L - 1; n >= 0; n--)
-		{
-			int minLevIdx = myPowInt(2, n) - 1;
-			int maxLevIdx = myPowInt(2, n + 1) - 2;
-			int kHigher = maxLevIdx + 1; // index of child element
-
-			for (int k = minLevIdx; k <= maxLevIdx; k++)
-			{
-				// get child elements
-				real q1 = qScaleFlattened[scaleStep + kHigher];
-				real eta1 = etaScaleFlattened[scaleStep + kHigher];
-				real z1 = zScaleFlattened[scaleStep + kHigher];
-				
-				real q2 = qScaleFlattened[scaleStep + kHigher + 1];
-				real eta2 = etaScaleFlattened[scaleStep + kHigher + 1];
-				real z2 = zScaleFlattened[scaleStep + kHigher + 1];
-
-				qScaleFlattened[scaleStep + k] = encodeScale(q1, q2);
-				etaScaleFlattened[scaleStep + k] = encodeScale(eta1, eta2);
-				zScaleFlattened[scaleStep + k] = encodeScale(z1, z2);
-
-				qDetailsFlattened[detailStep + k] = encodeDetail(q1, q2);
-				etaDetailsFlattened[detailStep + k] = encodeDetail(eta1, eta2);
-				zDetailsFlattened[detailStep + k] = encodeDetail(z1, z2);
-
-				kHigher += 2; // increment by two to step along both of the child elements
-			}
-		}
-
-		qScaleCoarse[c] = qScaleFlattened[scaleStep];
-		etaScaleCoarse[c] = etaScaleFlattened[scaleStep];
-		zScaleCoarse[c] = zScaleFlattened[scaleStep];
 	}
+	
+	int assembledSolutionLength = 0;
 
-	// END ENCODING SCALE AND DETAIL COEFFICIENTS //
+	// defining to be the largest possible size for later reuse
+	real* qWithBC = new real[cellsFine + 2]();
+	real* hWithBC = new real[cellsFine + 2]();
+	real* zWithBC = new real[cellsFine + 2]();
+	int* activeIndexArray = new int[cellsFine]();
 
-	while (i < 100)
-	{
-		i++;
-	}
+	real* qDetailsFlattened = new real[totalDetails]();
+	real* etaDetailsFlattened = new real[totalDetails]();
+	real* zDetailsFlattened = new real[totalDetails]();
+	
+	real* normalisedDetails = new real[totalDetails];
+	bool* significantDetails = new bool[totalDetails]();
 
 	real timeNow = 0;
 	real dt = C(1e-4);
-
-	real* normalisedDetails = new real[totalDetails];
-
+	
 	while (timeNow < simulationParameters.simulationTime)
 	{
-		timeNow += dt;
+		timeNow += dt; 
+		
+		// declaring vectors for pushing back variables during decoding in an adaptive manner
+		vector<real> qAdaptive;
+		vector<real> etaAdaptive;
+		vector<real> zAdaptive;
+		vector<real> dxAdaptive;
+		vector<real> xAdaptive;
+		vector<int> levelIndicesAdaptive;
+		vector<int> activeIndices;
+		
+		real qMax = 0;
+		real zMax = 0;
+		real etaMax = 0;
 
+		// inserting the assembled scale coeffs into the flattened vector
+		if (assembledSolutionLength)
+		{
+			for (i = 0; i < assembledSolutionLength; i++)
+			{
+				real q = qWithBC[i + 1];
+				real eta = hWithBC[i + 1] + zWithBC[i + 1];
+				real z = zWithBC[i + 1];
+
+				qScaleFlattened[activeIndexArray[i]] = q;
+				etaScaleFlattened[activeIndexArray[i]] = eta;
+				zScaleFlattened[activeIndexArray[i]] = z;
+
+				qMax = max(qMax, abs(q));
+				etaMax = max(etaMax, abs(eta));
+				zMax = max(zMax, abs(z));
+			}
+
+			for (i = 0; i < totalDetails; i++)
+			{
+				real a = (qMax != 0) ? qDetailsFlattened[i] / qMax : 0;
+				real b = (etaMax != 0) ? etaDetailsFlattened[i] / etaMax : 0;
+				real c = (zMax != 0) ? zDetailsFlattened[i] / zMax : 0;
+
+				normalisedDetails[i] = max(a, max(b, c));
+			}
+		}
+
+		delete[] qDetailsFlattened;
+		delete[] etaDetailsFlattened;
+		delete[] zDetailsFlattened;
+
+		// initialise zeroed details for thresholding
+		qDetailsFlattened = new real[totalDetails]();
+		etaDetailsFlattened = new real[totalDetails]();
+		zDetailsFlattened = new real[totalDetails]();
+		
+
+		// BEGIN ENCODING //
+
+		for (int c = 0; c < simulationParameters.cells; c++)
+		{
+			int scaleStep = c * scaleCoeffsPerCell;
+			int detailStep = c * detailsPerCell;
+
+			for (int n = solverParameters.L - 1; n >= 0; n--)
+			{
+				int currentLevStart = (1 << n) - 1;
+				int currentLevEnd = (1 << (n + 1)) - 2;
+				int kHigher = currentLevEnd + 1;
+
+				for (int k = currentLevStart; k <= currentLevEnd; k++)
+				{
+					if (significantDetails[detailStep + k] || !assembledSolutionLength)
+					{
+						real q1 = qScaleFlattened[scaleStep + kHigher];
+						real eta1 = etaScaleFlattened[scaleStep + kHigher];
+						real z1 = zScaleFlattened[scaleStep + kHigher];
+
+						real q2 = qScaleFlattened[scaleStep + kHigher + 1];
+						real eta2 = etaScaleFlattened[scaleStep + kHigher + 1];
+						real z2 = zScaleFlattened[scaleStep + kHigher + 1];
+
+						qScaleFlattened[scaleStep + k] = encodeScale(q1, q2);
+						etaScaleFlattened[scaleStep + k] = encodeScale(eta1, eta2);
+						zScaleFlattened[scaleStep + k] = encodeScale(z1, z2);
+
+						qDetailsFlattened[detailStep + k] = encodeDetail(q1, q2);
+						etaDetailsFlattened[detailStep + k] = encodeDetail(eta1, eta2);
+						zDetailsFlattened[detailStep + k] = encodeDetail(z1, z2);
+					}
+
+					kHigher += 2;
+				}
+			}
+
+			qScaleCoarse[c] = qScaleFlattened[scaleStep];
+			etaScaleCoarse[c] = etaScaleFlattened[scaleStep];
+			zScaleCoarse[c] = zScaleFlattened[scaleStep];
+		}
+
+		// END ENCODING //
+		
+
+		// only applies for the first step where solution length is 0
+		if (!assembledSolutionLength)
+		{
+			for (i = 0; i < cellsFine; i++)
+			{
+				qMax = max(qMax, abs(qScaleFine[i]));
+				zMax = max(zMax, abs(zScaleFine[i]));
+				etaMax = max(etaMax, abs(etaScaleFine[i]));
+			}
+
+			for (i = 0; i < totalDetails; i++)
+			{
+				real a = (qMax != 0) ? qDetailsFlattened[i] / qMax : 0;
+				real b = (etaMax != 0) ? etaDetailsFlattened[i] / etaMax : 0;
+				real c = (zMax != 0) ? zDetailsFlattened[i] / zMax : 0;
+
+				normalisedDetails[i] = max(a, max(b, c));
+			}
+		}
+
+		// zeroing significant details to reconstruct tree of details for the next iteration
+		for (i = 0; i < totalDetails; i++)
+		{
+			significantDetails[i] = false;
+		}
+
+		// time step tuning
 		if (timeNow - simulationParameters.simulationTime > 0)
 		{
 			timeNow -= dt;
@@ -197,17 +281,6 @@ int main()
 			timeNow += dt;
 		}
 
-		for (i = 0; i < totalDetails; i++)
-		{
-			qMax != 0 ? qDetailsFlattened[i] /= qMax : qDetailsFlattened[i];
-			etaMax != 0 ? etaDetailsFlattened[i] /= etaMax : etaDetailsFlattened[i];
-			zMax != 0 ? zDetailsFlattened[i] /= zMax : zDetailsFlattened[i];
-
-			real a = max(qDetailsFlattened[i], etaDetailsFlattened[i]);
-			normalisedDetails[i] = max(a, zDetailsFlattened[i]);
-		}
-
-		bool* significantDetails = new bool[totalDetails]();
 
 		// START PREDICTION //
 
@@ -218,10 +291,10 @@ int main()
 
 			for (int n = 0; n < solverParameters.L; n++)
 			{
-				int minLevIdx = myPowInt(2, n) - 1;
-				int maxLevIdx = myPowInt(2, n + 1) - 2;
+				int currentLevStart = (1 << n) - 1;
+				int currentLevEnd = (1 << (n + 1)) - 2;
 
-				for (int k = minLevIdx; k <= maxLevIdx; k++)
+				for (int k = currentLevStart; k <= currentLevEnd; k++)
 				{
 					real epsilonLocal = solverParameters.epsilon * pow(C(2.0), n - solverParameters.L);
 
@@ -229,14 +302,14 @@ int main()
 					{
 						significantDetails[detailStep + k] = true;
 
-						if (c + 1 < simulationParameters.cells && k == maxLevIdx) // if it's not the last cell and at the right-most edge
+						if (c + 1 < simulationParameters.cells && k == currentLevEnd) // if it's not the last cell and at the right-most edge
 						{
-							significantDetails[(c + 1) * detailsPerCell + minLevIdx] = true; // make the subelement to the right cell also significant
+							significantDetails[(c + 1) * detailsPerCell + currentLevStart] = true; // make the subelement to the right cell also significant
 						}
 
-						if (c > 0 && k == minLevIdx) // if it's not the first cell and at the left-most edge
+						if (c > 0 && k == currentLevStart) // if it's not the first cell and at the left-most edge
 						{
-							significantDetails[(c - 1) * detailsPerCell + maxLevIdx] = true; // the subelement on the left cell is also significant
+							significantDetails[(c - 1) * detailsPerCell + currentLevEnd] = true; // the subelement on the left cell is also significant
 						}
 					}
 				}
@@ -246,7 +319,6 @@ int main()
 		// END PREDICTION //
 
 		
-
 		// START REGULARISATION //
 
 		for (int c = 0; c < simulationParameters.cells; c++)
@@ -255,11 +327,11 @@ int main()
 
 			for (int n = solverParameters.L; n > 1; n--)
 			{
-				int k = myPowInt(2, n - 1) - 1;
-				int kLower = myPowInt(2, n - 2) - 1;
-				int maxLevIdx = myPowInt(2, n) - 2;
+				int k = (1 << (n - 1)) - 1;
+				int kLower = (1 << (n - 2)) - 1;
+				int currentLevEnd = (1 << n) - 2;
 
-				while (k <= maxLevIdx)
+				while (k < currentLevEnd)
 				{
 					if (significantDetails[detailStep + k] || significantDetails[detailStep + k + 1])
 					{
@@ -275,7 +347,6 @@ int main()
 		// END REGULARISATION //
 
 		
-
 		// START EXTRA SIGNIFICANCE //
 
 		for (int c = 0; c < simulationParameters.cells; c++)
@@ -284,11 +355,11 @@ int main()
 
 			for (int n = 0; n < solverParameters.L; n++)
 			{
-				int minLevIdx = myPowInt(2, n) - 1;
-				int maxLevIdx = myPowInt(2, n + 1) - 2;
-				int kHigher = maxLevIdx + 1; // index of child element
+				int currentLevStart = (1 << n) - 1;
+				int currentLevEnd = (1 << (n + 1)) - 2;
+				int kHigher = currentLevEnd + 1; // index of child element
 
-				for (int k = minLevIdx; k <= maxLevIdx; k++)
+				for (int k = currentLevStart; k <= currentLevEnd; k++)
 				{
 					if (significantDetails[detailStep + k])
 					{
@@ -310,6 +381,7 @@ int main()
 
 		// END EXTRA SIGNIFICANCE //
 
+
 		delete[] qScaleFlattened;
 		delete[] etaScaleFlattened;
 		delete[] zScaleFlattened;
@@ -322,21 +394,13 @@ int main()
 		real* xFlattened = new real[totalScaleCoeffs];
 		int* levelIndicesFlattened = new int[totalScaleCoeffs];
 
-		vector<real> qAdaptive;
-		vector<real> etaAdaptive;
-		vector<real> zAdaptive;
-		vector<real> dxAdaptive;
-		vector<real> xAdaptive;
-		vector<int> levelIndicesAdaptive;
-		vector<int> activeIndices;
-
 		// initialising with NAN to later check for undecoded scale coeff and avoid assembly
 		for (int i = 0; i < totalScaleCoeffs; i++)
 		{
 			qScaleFlattened[i] = NAN;
 		}
 
-		real* xIntCoarse = new real[simulationParameters.cells + 1];
+		real* xIntCoarse = new real[simulationParameters.cells + 1]();
 
 		// coarse mesh
 		for (i = 0; i < simulationParameters.cells + 1; i++)
@@ -356,6 +420,7 @@ int main()
 			levelIndicesFlattened[scaleStep] = 0;
 		}
 
+
 		// START DECODING //
 
 		for (int c = 0; c < simulationParameters.cells; c++)
@@ -365,11 +430,11 @@ int main()
 
 			for (int n = 0; n < solverParameters.L; n++)
 			{
-				int minLevIdx = myPowInt(2, n) - 1;
-				int maxLevIdx = myPowInt(2, n + 1) - 2;
-				int kHigher = maxLevIdx + 1; // index of child element
+				int currentLevStart = (1 << n) - 1;
+				int currentLevEnd = (1 << (n + 1)) - 2;
+				int kHigher = currentLevEnd + 1; // index of child element
 
-				for (int k = minLevIdx; k <= maxLevIdx; k++)
+				for (int k = currentLevStart; k <= currentLevEnd; k++)
 				{
 					if (!significantDetails[detailStep + k] && !isnan(qScaleFlattened[scaleStep + k]))
 					{
@@ -531,12 +596,8 @@ int main()
 		// END SORTING //
 
 
-		int assembledSolutionLength = activeIndices.size();
+		assembledSolutionLength = activeIndices.size();
 
-		// allocate buffers for flow modes with ghost BCs
-		real* qWithBC = new real[assembledSolutionLength + 2];
-		real* hWithBC = new real[assembledSolutionLength + 2];
-		real* zWithBC = new real[assembledSolutionLength + 2];
 		real* dxLocalWithBC = new real[assembledSolutionLength + 2];
 
 		// load from vector 
@@ -546,6 +607,7 @@ int main()
 			hWithBC[i + 1] = etaAdaptive[i] - zAdaptive[i];
 			zWithBC[i + 1] = zAdaptive[i];
 			dxLocalWithBC[i + 1] = dxAdaptive[i];
+			activeIndexArray[i] = activeIndices[i];
 		}
 
 		// allocate true/false buffer for dry cells
@@ -647,15 +709,12 @@ int main()
 			real hMax = max(hLocal, hBackward);
 			hMax = max(hForward, hMax);
 
-			if (hMax <= solverParameters.tolDry)
-			{
-				dry[i] = true;
-			}
+			dry[i] = (hMax <= solverParameters.tolDry);
 		}
 
-		for (i = 0; i < assembledSolutionLength + 2; i++)
+		for (i = 1; i < assembledSolutionLength + 1; i++)
 		{
-			etaTemp[i] = hWithBC[i] + zWithBC[i];
+			etaTemp[i] = etaAdaptive[i - 1];
 		}
 
 		// initialising interface values
@@ -715,11 +774,7 @@ int main()
 		for (i = 1; i < assembledSolutionLength + 1; i++)
 		{
 			// skip increment in dry cells
-			if (dry[i])
-			{
-				continue;
-			}
-			else
+			if (!dry[i])
 			{
 				real massIncrement = -(1 / dxLocalWithBC[i]) * (massFlux[i] - massFlux[i - 1]);
 				real momentumIncrement = -(1 / dxLocalWithBC[i]) * (momentumFlux[i] - momentumFlux[i - 1] + 2 * sqrt(C(3.0)) * solverParameters.g * hBar[i - 1] * zBar[i - 1]);
@@ -736,6 +791,8 @@ int main()
 
 		// CFL time step adjustment
 		dt = 1e9;
+		real totalMass = 0;
+		steps++;
 
 		for (i = 1; i < assembledSolutionLength + 1; i++)
 		{
@@ -749,21 +806,16 @@ int main()
 				real dtCFL = solverParameters.CFL * dxLocalWithBC[i] / (abs(u) + sqrt(solverParameters.g * hWithBC[i]));
 				dt = min(dt, dtCFL);
 			}
-		}
 
-		for (i = 1; i < assembledSolutionLength + 1; i++)
-		{
-			printf("%0.2f, ", hWithBC[i] + zWithBC[i]);
+			totalMass += hWithBC[i] * dxLocalWithBC[i];
 		}
-		printf("\n");
 
 		/*for (i = 1; i < assembledSolutionLength + 1; i++)
 		{
-			printf("%0.2f, ", dxLocalWithBC[i]);
+			printf("%0.1f, ", hWithBC[i] + zWithBC[i]);
 		}
 		printf("\n");*/
-
-		printf("%f s\n", timeNow);
+		printf("Mass: %.17g, dt: %f, simulation time: %f s\n", totalMass, dt, timeNow);
 
 		delete[] qScaleFlattened;
 		delete[] etaScaleFlattened;
@@ -773,91 +825,12 @@ int main()
 		etaScaleFlattened = new real[totalScaleCoeffs];
 		zScaleFlattened = new real[totalScaleCoeffs];
 
-		delete[] qDetailsFlattened;
-		delete[] etaDetailsFlattened;
-		delete[] zDetailsFlattened;
-
-		// initialise zeroed details for thresholding
-		qDetailsFlattened = new real[totalDetails]();
-		etaDetailsFlattened = new real[totalDetails]();
-		zDetailsFlattened = new real[totalDetails]();
-
-		qMax = 0;
-		etaMax = 0;
-		zMax = 0;
-
-		for (i = 0; i < assembledSolutionLength; i++)
-		{
-			real q = qWithBC[i + 1];
-			real eta = hWithBC[i + 1] + zWithBC[i + 1];
-			real z = zWithBC[i + 1];
-
-			qScaleFlattened[activeIndices[i]] = q;
-			etaScaleFlattened[activeIndices[i]] = eta;
-			zScaleFlattened[activeIndices[i]] = z;
-
-			qMax = max(qMax, abs(q));
-			etaMax = max(etaMax, abs(eta));
-			zMax = max(zMax, abs(z));
-		}
-
-		
-		// BEGIN ENCODING //
-
-		for (int c = 0; c < simulationParameters.cells; c++)
-		{
-			int scaleStep = c * scaleCoeffsPerCell;
-			int detailStep = c * detailsPerCell;
-
-			for (int n = solverParameters.L - 1; n >= 0; n--)
-			{
-				int minLevIdx = myPowInt(2, n) - 1;
-				int maxLevIdx = myPowInt(2, n + 1) - 2;
-				int kHigher = maxLevIdx + 1;
-
-				for (int k = minLevIdx; k <= maxLevIdx; k++)
-				{
-					if (significantDetails[detailStep + k])
-					{
-						real q1 = qScaleFlattened[scaleStep + kHigher];
-						real eta1 = etaScaleFlattened[scaleStep + kHigher];
-						real z1 = zScaleFlattened[scaleStep + kHigher];
-
-						real q2 = qScaleFlattened[scaleStep + kHigher + 1];
-						real eta2 = etaScaleFlattened[scaleStep + kHigher + 1];
-						real z2 = zScaleFlattened[scaleStep + kHigher + 1];
-
-						qScaleFlattened[scaleStep + k] = encodeScale(q1, q2);
-						etaScaleFlattened[scaleStep + k] = encodeScale(eta1, eta2);
-						zScaleFlattened[scaleStep + k] = encodeScale(z1, z2);
-
-						qDetailsFlattened[detailStep + k] = encodeDetail(q1, q2);
-						etaDetailsFlattened[detailStep + k] = encodeDetail(eta1, eta2);
-						zDetailsFlattened[detailStep + k] = encodeDetail(z1, z2);
-					}
-
-					kHigher += 2;
-				}
-			}
-
-			qScaleCoarse[c] = qScaleFlattened[scaleStep];
-			etaScaleCoarse[c] = etaScaleFlattened[scaleStep];
-			zScaleCoarse[c] = zScaleFlattened[scaleStep];
-		}
-
-		// END ENCODING //
-
-		delete[] significantDetails;
-
 		delete[] dxFlattened;
 		delete[] xFlattened;
 		delete[] levelIndicesFlattened;
 
 		delete[] xIntCoarse;
 
-		delete[] qWithBC;
-		delete[] hWithBC;
-		delete[] zWithBC;
 		delete[] dxLocalWithBC;
 
 		delete[] dry;
@@ -917,7 +890,13 @@ int main()
 	delete[] etaDetailsFlattened;
 	delete[] zDetailsFlattened;
 
+	delete[] qWithBC;
+	delete[] hWithBC;
+	delete[] zWithBC;
+	delete[] activeIndexArray;
+
 	delete[] normalisedDetails;
+	delete[] significantDetails;
 
 	return 0;
 }
