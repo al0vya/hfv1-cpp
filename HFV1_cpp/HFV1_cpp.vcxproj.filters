@@ -51,6 +51,9 @@
     <ClCompile Include="decode2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="treeTraversalDecode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="baselineMesh.h">
@@ -102,6 +105,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="decode2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="treeTraversalDecode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FlattenedScaleCoeffs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FlattenedDetails.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AssembledSolution.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

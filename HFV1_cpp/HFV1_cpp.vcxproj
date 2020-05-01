@@ -30,15 +30,19 @@
     <ClCompile Include="mainProgram.cpp" />
     <ClCompile Include="myPowInt.cpp" />
     <ClCompile Include="qInitial.cpp" />
+    <ClCompile Include="treeTraversalDecode.cpp" />
     <ClCompile Include="uFaceValues.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AssembledSolution.h" />
     <ClInclude Include="baselineMesh.h" />
     <ClInclude Include="bedDataConservative.h" />
     <ClInclude Include="BoundaryConditions.h" />
     <ClInclude Include="decode1.h" />
     <ClInclude Include="encodeDetail.h" />
     <ClInclude Include="encodeScale.h" />
+    <ClInclude Include="FlattenedDetails.h" />
+    <ClInclude Include="FlattenedScaleCoeffs.h" />
     <ClInclude Include="fluxHLL.h" />
     <ClInclude Include="frictionImplicit.h" />
     <ClInclude Include="decode2.h" />
@@ -49,6 +53,7 @@
     <ClInclude Include="real.h" />
     <ClInclude Include="simulationParameters.h" />
     <ClInclude Include="SolverParameters.h" />
+    <ClInclude Include="treeTraversalDecode.h" />
     <ClInclude Include="uFaceValues.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
