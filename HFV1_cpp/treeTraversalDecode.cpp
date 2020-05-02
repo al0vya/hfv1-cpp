@@ -21,8 +21,6 @@ void treeTraversalDecode(
 	
 	AssembledSolution &assembledSolution)
 {
-	static unsigned int stepper = 0;
-	
 	// initially, n = 0 and k = 0
 	int currentLevStart = (1 << n) - 1;
 	int currentLevEnd = (1 << (n + 1)) - 2;
@@ -89,7 +87,5 @@ void treeTraversalDecode(
 		assembledSolution.dxLocalWithBC[idx + 1] = dxLocal;
 		assembledSolution.activeIndices[idx] = scaleStep + k;
 		assembledSolution.length++;
-
-		stepper++;
 	}
 }
