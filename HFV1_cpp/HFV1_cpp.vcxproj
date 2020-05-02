@@ -28,10 +28,8 @@
     <ClCompile Include="frictionImplicit.cpp" />
     <ClCompile Include="hInitial.cpp" />
     <ClCompile Include="mainProgram.cpp" />
-    <ClCompile Include="myPowInt.cpp" />
     <ClCompile Include="qInitial.cpp" />
     <ClCompile Include="treeTraversalDecode.cpp" />
-    <ClCompile Include="uFaceValues.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssembledSolution.h" />
@@ -48,13 +46,11 @@
     <ClInclude Include="decode2.h" />
     <ClInclude Include="hInitial.h" />
     <ClInclude Include="maskFilterHaar.h" />
-    <ClInclude Include="myPowInt.h" />
     <ClInclude Include="qInitial.h" />
     <ClInclude Include="real.h" />
     <ClInclude Include="simulationParameters.h" />
     <ClInclude Include="SolverParameters.h" />
     <ClInclude Include="treeTraversalDecode.h" />
-    <ClInclude Include="uFaceValues.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -33,12 +33,6 @@
     <ClCompile Include="qInitial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="uFaceValues.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="myPowInt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="encodeScale.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -86,13 +80,7 @@
     <ClInclude Include="SolverParameters.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="uFaceValues.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="maskFilterHaar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="myPowInt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="encodeScale.h">

@@ -13,7 +13,6 @@
 #include "qInitial.h"
 #include "hInitial.h"
 #include "frictionImplicit.h"
-#include "uFaceValues.h"
 #include "fluxHLL.h"
 #include "encodeDetail.h"
 #include "encodeScale.h"
@@ -46,8 +45,8 @@ int main()
 	solverParameters.L = 9;
 
 	BoundaryConditions bcs;
-	bcs.hl = C(3.0);
-	bcs.hr = C(3.0);
+	bcs.hl = C(4.0);
+	bcs.hr = C(4.0);
 
 	bcs.ql = C(0.0);
 	bcs.qr = C(0.0);
@@ -423,15 +422,6 @@ int main()
 
 		// END EXTRA SIGNIFICANCE //
 
-
-		delete[] flattenedScaleCoeffs.q;
-		delete[] flattenedScaleCoeffs.eta;
-		delete[] flattenedScaleCoeffs.z;
-
-		flattenedScaleCoeffs.q = new real[totalScaleCoeffs];
-		flattenedScaleCoeffs.eta = new real[totalScaleCoeffs];
-		flattenedScaleCoeffs.z = new real[totalScaleCoeffs];
-
 		// reset since passing by reference
 		assembledSolution.length = 0;
 
@@ -513,8 +503,8 @@ int main()
 		for (int i = 0; i < assembledSolution.length + 1; i++)
 		{
 			// initialising velocity interface values
-			uWest[i] = uFaceValues(solverParameters, qWest[i], hWest[i]);
-			uEast[i] = uFaceValues(solverParameters, qEast[i], hEast[i]);
+			uWest[i] = (hWest[i] <= solverParameters.tolDry) ? 0 : qWest[i] / hWest[i];
+			uEast[i] = (hEast[i] <= solverParameters.tolDry) ? 0 : qEast[i] / hEast[i];
 
 			// intermediate calculations
 			real a = etaWest[i] - hWest[i];
@@ -584,14 +574,6 @@ int main()
 		}
 		printf("\n");*/
 		printf("Mass: %.17g, dt: %f, simulation time: %f s\n", totalMass, dt, timeNow);
-
-		delete[] flattenedScaleCoeffs.q;
-		delete[] flattenedScaleCoeffs.eta;
-		delete[] flattenedScaleCoeffs.z;
-
-		flattenedScaleCoeffs.q = new real[totalScaleCoeffs];
-		flattenedScaleCoeffs.eta = new real[totalScaleCoeffs];
-		flattenedScaleCoeffs.z = new real[totalScaleCoeffs];
 	}
 
 	// delete buffers
