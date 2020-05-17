@@ -25,6 +25,6 @@ void treeTraversalDecode(
 	int detailStep,
 	int scaleStep,
 
-	bool* significantDetails,
+	int* significantDetails,
 
 	AssembledSolution &assembledSolution);
