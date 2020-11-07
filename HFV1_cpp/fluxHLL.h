@@ -5,7 +5,7 @@
 using namespace std;
 
 #include "real.h"
-#include "SimulationParameters.h"
 #include "SolverParameters.h"
+#include "AssembledSolution.h"
 
-void fluxHLL(int assembledSolutionLength, SolverParameters solverParameters, real* hWestStar, real* hEastStar, real* qWestStar, real* qEastStar, real* uWest, real* uEast, real* massFlux, real* momentumFlux);
+void fluxHLL(AssembledSolution assembledSolution, SolverParameters solverParameters, real* hWestStar, real* hEastStar, real* qWestStar, real* qEastStar, real* massFlux, real* momentumFlux);

@@ -24,9 +24,6 @@
     <ClCompile Include="frictionImplicit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="hInitial.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="mainProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -48,6 +45,24 @@
     <ClCompile Include="treeTraversalDecode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="writeSolutionToFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hInitialConservative.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hInitialOvertopping.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="set_boundary_conditions_for_test_case.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="set_simulation_parameters_for_test_case.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="set_solver_parameters_for_test_case.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="baselineMesh.h">
@@ -63,9 +78,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="frictionImplicit.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="hInitial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="qInitial.h">
@@ -105,6 +117,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AssembledSolution.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="writeSolutionToFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hInitialConservative.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hInitialOvertopping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="set_boundary_conditions_for_test_case.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="set_simulation_parameters_for_test_case.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="set_solver_parameters_for_test_case.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

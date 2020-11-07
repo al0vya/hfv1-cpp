@@ -3,15 +3,20 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <fstream>
 #include <time.h>
 
 #include "real.h"
 #include "SimulationParameters.h"
 #include "SolverParameters.h"
 #include "BoundaryConditions.h"
+#include "set_simulation_parameters_for_test_case.h"
+#include "set_solver_parameters_for_test_case.h"
+#include "set_boundary_conditions_for_test_case.h"
 #include "bedDataConservative.h"
+#include "hInitialConservative.h"
+#include "hInitialOvertopping.h"
 #include "qInitial.h"
-#include "hInitial.h"
 #include "frictionImplicit.h"
 #include "fluxHLL.h"
 #include "encodeDetail.h"
@@ -22,11 +27,13 @@
 #include "FlattenedDetails.h"
 #include "AssembledSolution.h"
 #include "treeTraversalDecode.h"
+#include "writeSolutionToFile.h"
 
 using namespace std;
 
-void printTree(SolverParameters solverParameters, int* significantDetails, int scaleCoeffsPerCell, int detailsPerCell);
-void printTreeOfReals(SolverParameters solverParameters, real* normalisedDetails, int scaleCoeffsPerCell, int detailsPerCell);
+void printTree(SimulationParameters simulationParameters, SolverParameters solverParameters, int* significantDetails, int detailsPerCell);
+void printTreeOfReals(SimulationParameters simulationParameters, SolverParameters solverParameters, real* details, int detailsPerCell);
+void printScaleCoeffs(SimulationParameters simulationParameters, SolverParameters solverParameters, real* scaleCoeffs, int scalesCoeffsPerCell);
 
 int main()
 {
@@ -36,42 +43,73 @@ int main()
 	int i;
 	int steps = 0;
 
-	SimulationParameters simulationParameters;
-	simulationParameters.xmin = 0;
-	simulationParameters.xmax = 50;
-	simulationParameters.simulationTime = C(100.0);
-	simulationParameters.manning = C(0.02);
+	std::cout << "Please enter a number between 1 and 6 to select a test case.\n"
+		"1: Wet dam break\n"
+		"2: Dry dam break\n"
+		"3: Dry dam break with friction\n"
+		"4: Wet lake-at-rest (C-property)\n"
+		"5: Wet/dry lake-at-rest\n"
+		"6: Building overtopping\n";
 
-	SolverParameters solverParameters;
-	solverParameters.cells = 1;
-	solverParameters.CFL = C(0.33);
-	solverParameters.tolDry = C(1e-3);
-	solverParameters.g = C(9.80665);
-	solverParameters.L = 10;
+	int test_case_selection;
 
-	BoundaryConditions bcs;
-	bcs.hl = C(6.0);
-	bcs.hr = C(0.0);
+	std::cin >> test_case_selection;
 
-	bcs.ql = C(0.0);
-	bcs.qr = C(0.0);
+	if (!std::cin || test_case_selection > 6 || test_case_selection < 1)
+	{
+		std::cout << "Error: please rerun and enter a number between 1 and 6. Exiting program.\n";
 
-	bcs.reflectUp = C(1.0);
-	bcs.reflectDown = C(1.0);
+		return -1;
+	}
 
-	bcs.hImposedUp = C(0.0);
-	bcs.qxImposedUp = C(0.0);
+	std::cout << "Please enter the number of mother elements.\n";
 
-	bcs.hImposedDown = C(0.0);
-	bcs.qxImposedDown = C(0.0);
+	int number_of_cells;
 
-	real dxCoarse = (simulationParameters.xmax - simulationParameters.xmin) / solverParameters.cells;
+	std::cin >> number_of_cells;
+
+	if (!std::cin || number_of_cells < 1)
+	{
+		std::cout << "Error: please rerun and enter a integer value. Exiting program.\n";
+
+		return -1;
+	}
+
+	std::cout << "Please select a maximum refinement level.\n";
+
+	int user_input_max_refinement_level;
+
+	std::cin >> user_input_max_refinement_level;
+
+	if (!std::cin || user_input_max_refinement_level < 1)
+	{
+		std::cout << "Error: please rerun and enter a integer value. Exiting program.\n";
+
+		return -1;
+	}
+
+	std::cout << "Please enter an error threshold.\n";
+
+	real user_input_epsilon;
+
+	std::cin >> user_input_epsilon;
+
+	if (!std::cin)
+	{
+		std::cout << "Error: please rerun and enter a float or double value. Exiting program.\n";
+
+		return -1;
+	}
+
+	SimulationParameters simulationParameters = set_simulation_parameters_for_test_case(test_case_selection, number_of_cells);
+	SolverParameters solverParameters = set_solver_parameters_for_test_case(user_input_max_refinement_level, user_input_epsilon);
+	BoundaryConditions bcs = set_boundary_conditions_for_test_case(test_case_selection);
+
+	real dxCoarse = (simulationParameters.xmax - simulationParameters.xmin) / simulationParameters.cells;
 	real dxFine = dxCoarse / (1 << solverParameters.L);
 
-	solverParameters.epsilon = dxFine / 2;
-
 	// number of cells/interfaces at finest resolution
-	int cellsFine = solverParameters.cells * (1 << solverParameters.L);
+	int cellsFine = simulationParameters.cells * (1 << solverParameters.L);
 	int interfacesFine = cellsFine + 1;
 
 	real* xIntFine = new real[interfacesFine];
@@ -83,15 +121,45 @@ int main()
 	for (i = 0; i < interfacesFine; i++)
 	{
 		xIntFine[i] = simulationParameters.xmin + i * dxFine;
-		zIntFine[i] = bedDataConservative(xIntFine[i]);
-		hIntFine[i] = hInitial(bcs, zIntFine[i], xIntFine[i]);
-		qIntFine[i] = qInitial(bcs, xIntFine[i]);
 	}
 
-	real* xIntCoarse = new real[solverParameters.cells + 1]();
+	switch (test_case_selection)
+	{
+	case 1:
+	case 2:
+	case 3:
+		for (i = 0; i < interfacesFine; i++)
+		{
+			zIntFine[i] = 0;
+			hIntFine[i] = hInitialOvertopping(bcs, zIntFine[i], xIntFine[i]);
+			qIntFine[i] = qInitial(bcs, xIntFine[i]);
+		}
+		break;
+	case 4:
+	case 5:
+		for (i = 0; i < interfacesFine; i++)
+		{
+			zIntFine[i] = bedDataConservative(xIntFine[i]);
+			hIntFine[i] = hInitialConservative(bcs, zIntFine[i], xIntFine[i]);
+			qIntFine[i] = qInitial(bcs, xIntFine[i]);
+		}
+		break;
+	case 6:
+		for (i = 0; i < interfacesFine; i++)
+		{
+			zIntFine[i] = bedDataConservative(xIntFine[i]);
+			hIntFine[i] = hInitialOvertopping(bcs, zIntFine[i], xIntFine[i]);
+			qIntFine[i] = qInitial(bcs, xIntFine[i]);
+		}
+		break;
+	default:
+		break;
+	}
+
+	real* xIntCoarse = new real[simulationParameters.cells + 1]();
 
 	// coarse mesh
-	for (i = 0; i < solverParameters.cells + 1; i++)
+	for (i = 0; i < simulationParameters.cells + 1; i++)
 	{
 		xIntCoarse[i] = simulationParameters.xmin + dxCoarse * i;
 	}
@@ -104,14 +172,14 @@ int main()
 	// finest scale coefficients
 	for (i = 0; i < cellsFine; i++)
 	{
-		qScaleFine[i] = (qIntFine[i] + qIntFine[i + 1]) / C(2.0);
+		qScaleFine[i] = (qIntFine[i] + qIntFine[i + 1]) / 2;
 		hScaleFine[i] = (hIntFine[i] + hIntFine[i + 1]) / 2;
 		zScaleFine[i] = (zIntFine[i] + zIntFine[i + 1]) / 2;
 		etaScaleFine[i] = zScaleFine[i] + hScaleFine[i];
 	}
 
 	int scaleCoeffsPerCell = (1 << (solverParameters.L + 1)) - 1;
-	int totalScaleCoeffs = scaleCoeffsPerCell * solverParameters.cells;
+	int totalScaleCoeffs = scaleCoeffsPerCell * simulationParameters.cells;
 
 	FlattenedScaleCoeffs flattenedScaleCoeffs;
 	flattenedScaleCoeffs.q = new real[totalScaleCoeffs]();
@@ -119,10 +187,10 @@ int main()
 	flattenedScaleCoeffs.z = new real[totalScaleCoeffs]();
 
 	int detailsPerCell = (1 << solverParameters.L) - 1;
-	int totalDetails = detailsPerCell * solverParameters.cells;
+	int totalDetails = detailsPerCell * simulationParameters.cells;
 
 	// load the fine scale data
-	for (int c = 0; c < solverParameters.cells; c++)
+	for (int c = 0; c < simulationParameters.cells; c++)
 	{
 		int scaleStep = c * scaleCoeffsPerCell;
 
@@ -141,6 +209,7 @@ int main()
 	assembledSolution.hWithBC = new real[cellsFine + 2]();
 	assembledSolution.zWithBC = new real[cellsFine + 2]();
 	assembledSolution.dxLocalWithBC = new real[cellsFine + 2];
+	assembledSolution.x = new real[cellsFine + 2];
 	assembledSolution.activeIndices = new int[cellsFine]();
 	assembledSolution.length = 0;
 
@@ -177,13 +246,11 @@ int main()
 	real* qWestStar = new real[cellsFine + 1];
 	real* hWestStar = new real[cellsFine + 1];
 
-	real* zStarIntermediate = new real[cellsFine + 1];
-	real* zStar = new real[cellsFine + 1];
+	real* zWestStar = new real[cellsFine + 1];
+	real* zEastStar = new real[cellsFine + 1];
 
-	real* uWest = new real[cellsFine + 1];
-	real* uEast = new real[cellsFine + 1];
-
-	real* delta = new real[cellsFine + 1];
+	real* deltaWest = new real[cellsFine + 1];
+	real* deltaEast = new real[cellsFine + 1];
 
 	// allocating buffers for numerical fluxes from HLL solver
 	real* massFlux = new real[cellsFine + 1];
@@ -193,9 +260,21 @@ int main()
 	real* hBar = new real[cellsFine];
 	real* zBar = new real[cellsFine];
 
+	real qMax = 0;
+	real zMax = 0;
+	real etaMax = 0;
+
 	bool firstStep = true;
 	real timeNow = 0;
 	real dt = C(1e-4);
+
+	ofstream data;
+
+	data.open("clock_time_vs_sim_time.csv");
+
+	data.precision(15);
+
+	data << "sim_time,clock_time" << std::endl;
 
 	while (timeNow < simulationParameters.simulationTime)
 	{
@@ -209,9 +288,8 @@ int main()
 		}
 
 		// reset maxes
-		real qMax = 0;
-		real zMax = 0;
-		real etaMax = 0;
+		qMax = 0;
+		etaMax = 0;
 
 		if (firstStep)
 		{
@@ -228,30 +306,30 @@ int main()
 			{
 				real q = assembledSolution.qWithBC[i + 1];
 				real eta = assembledSolution.hWithBC[i + 1] + assembledSolution.zWithBC[i + 1];
-				real z = assembledSolution.zWithBC[i + 1];
 
 				flattenedScaleCoeffs.q[assembledSolution.activeIndices[i]] = q;
 				flattenedScaleCoeffs.eta[assembledSolution.activeIndices[i]] = eta;
-				flattenedScaleCoeffs.z[assembledSolution.activeIndices[i]] = z;
 
 				qMax = max(qMax, abs(q));
 				etaMax = max(etaMax, abs(eta));
-				zMax = max(zMax, abs(z));
 			}
 		}
+
+		qMax = max(qMax, C(1.0));
+		etaMax = max(etaMax, C(1.0));
+		zMax = max(zMax, C(1.0));
 
 		// thresholding details to zero for next step
 		for (i = 0; i < totalDetails; i++)
 		{
 			flattenedDetails.q[i] = 0;
 			flattenedDetails.eta[i] = 0;
-			flattenedDetails.z[i] = 0;
 		}
 
 
 		// BEGIN ENCODING //
 
-		for (int c = 0; c < solverParameters.cells; c++)
+		for (int c = 0; c < simulationParameters.cells; c++)
 		{
 			int scaleStep = c * scaleCoeffsPerCell;
 			int detailStep = c * detailsPerCell;
@@ -268,19 +346,24 @@ int main()
 					{
 						real q1 = flattenedScaleCoeffs.q[scaleStep + kHigher];
 						real eta1 = flattenedScaleCoeffs.eta[scaleStep + kHigher];
-						real z1 = flattenedScaleCoeffs.z[scaleStep + kHigher];
 
 						real q2 = flattenedScaleCoeffs.q[scaleStep + kHigher + 1];
 						real eta2 = flattenedScaleCoeffs.eta[scaleStep + kHigher + 1];
-						real z2 = flattenedScaleCoeffs.z[scaleStep + kHigher + 1];
 
 						flattenedScaleCoeffs.q[scaleStep + k] = encodeScale(q1, q2);
 						flattenedScaleCoeffs.eta[scaleStep + k] = encodeScale(eta1, eta2);
-						flattenedScaleCoeffs.z[scaleStep + k] = encodeScale(z1, z2);
 
 						flattenedDetails.q[detailStep + k] = encodeDetail(q1, q2);
 						flattenedDetails.eta[detailStep + k] = encodeDetail(eta1, eta2);
-						flattenedDetails.z[detailStep + k] = encodeDetail(z1, z2);
+
+						if (firstStep)
+						{
+							real z1 = flattenedScaleCoeffs.z[scaleStep + kHigher];
+							real z2 = flattenedScaleCoeffs.z[scaleStep + kHigher + 1];
+
+							flattenedScaleCoeffs.z[scaleStep + k] = encodeScale(z1, z2);
+							flattenedDetails.z[detailStep + k] = encodeDetail(z1, z2);
+						}
 					}
 
 					kHigher += 2;
@@ -297,18 +380,16 @@ int main()
 		{
 			significantDetails[i] = false;
 
-			real a = (qMax != 0) ? flattenedDetails.q[i] / qMax : 0;
-			real b = (etaMax != 0) ? flattenedDetails.eta[i] / etaMax : 0;
-			real c = (zMax != 0) ? flattenedDetails.z[i] / zMax : 0;
+			real a = abs(flattenedDetails.q[i]) / qMax;
+			real b = abs(flattenedDetails.eta[i]) / etaMax;
+			real c = abs(flattenedDetails.z[i]) / zMax;
 
 			normalisedDetails[i] = max(a, max(b, c));
 		}
 
-		//printTreeOfReals(solverParameters, normalisedDetails, scaleCoeffsPerCell, detailsPerCell);
-
 		// START PREDICTION //
 
-		for (int c = 0; c < solverParameters.cells; c++)
+		for (int c = 0; c < simulationParameters.cells; c++)
 		{
 			int scaleStep = c * scaleCoeffsPerCell;
 			int detailStep = c * detailsPerCell;
@@ -326,7 +407,7 @@ int main()
 					{
 						significantDetails[detailStep + k] = true;
 
-						if (c + 1 < solverParameters.cells && k == currentLevEnd) // if it's not the last cell and at the right-most edge
+						if (c + 1 < simulationParameters.cells && k == currentLevEnd) // if it's not the last cell and at the right-most edge
 						{
 							significantDetails[(c + 1) * detailsPerCell + currentLevStart] = true; // make the subelement to the right cell also significant
 						}
@@ -342,11 +423,10 @@ int main()
 
 		// END PREDICTION //
 
-		printTree(solverParameters, significantDetails, scaleCoeffsPerCell, detailsPerCell);
 
 		// START REGULARISATION //
 
-		for (int c = 0; c < solverParameters.cells; c++)
+		for (int c = 0; c < simulationParameters.cells; c++)
 		{
 			int detailStep = c * detailsPerCell;
 
@@ -372,7 +452,7 @@ int main()
 
 		// START EXTRA SIGNIFICANCE //
 
-		for (int c = 0; c < solverParameters.cells; c++)
+		for (int c = 0; c < simulationParameters.cells; c++)
 		{
 			int detailStep = c * detailsPerCell;
 
@@ -389,7 +469,7 @@ int main()
 						real mBar = 1.5;
 						real epsilonLocal = solverParameters.epsilon * pow(C(2.0), n - solverParameters.L);
 
-						if (normalisedDetails[detailStep + k] >= epsilonLocal * pow(2, mBar + 1) && n + 1 != solverParameters.L)
+						if (normalisedDetails[detailStep + k] >= epsilonLocal * pow(C(2.0), mBar + 1) && n + 1 != solverParameters.L)
 						{
 							// if extra signficant child elements marked as active
 							significantDetails[detailStep + kHigher] = true;
@@ -407,7 +487,7 @@ int main()
 		// reset since passing by reference
 		assembledSolution.length = 0;
 
-		for (int c = 0; c < solverParameters.cells; c++)
+		for (int c = 0; c < simulationParameters.cells; c++)
 		{
 			int scaleStep = c * scaleCoeffsPerCell;
 			int detailStep = c * detailsPerCell;
@@ -461,7 +541,6 @@ int main()
 			dry[i] = (hMax <= solverParameters.tolDry);
 
 			etaTemp[i] = assembledSolution.hWithBC[i] + assembledSolution.zWithBC[i];
-			int dummy = 1;
 		}
 
 		// initialising interface values
@@ -483,38 +562,39 @@ int main()
 		for (int i = 0; i < assembledSolution.length + 1; i++)
 		{
 			// initialising velocity interface values
-			uWest[i] = (hWest[i] <= solverParameters.tolDry) ? 0 : qWest[i] / hWest[i];
-			uEast[i] = (hEast[i] <= solverParameters.tolDry) ? 0 : qEast[i] / hEast[i];
+			real uWest = (hWest[i] <= solverParameters.tolDry) ? 0 : qWest[i] / hWest[i];
+			real uEast = (hEast[i] <= solverParameters.tolDry) ? 0 : qEast[i] / hEast[i];
 
 			// intermediate calculations
-			real a = etaWest[i] - hWest[i];
-			real b = etaEast[i] - hEast[i];
-			zStarIntermediate[i] = max(a, b);
-			a = etaWest[i] - zStarIntermediate[i];
-			b = etaEast[i] - zStarIntermediate[i];
+			real zWest = etaWest[i] - hWest[i];
+			real zEast = etaEast[i] - hEast[i];
+
+			real zIntermediate = max(zWest, zEast);
+
+			deltaWest[i] = max(C(0.0), -(etaWest[i] - zIntermediate));
+			deltaEast[i] = max(C(0.0), -(etaEast[i] - zIntermediate));
 
 			// positivity-preserving nodes
-			hWestStar[i] = max(C(0.0), a);
-			hEastStar[i] = max(C(0.0), b);
+			hWestStar[i] = max(C(0.0), etaWest[i] - zIntermediate);
+			qWestStar[i] = uWest * hWestStar[i];
 
-			delta[i] = max(C(0.0), -a) + max(C(0.0), -b);
+			hEastStar[i] = max(C(0.0), etaEast[i] - zIntermediate);
+			qEastStar[i] = uEast * hEastStar[i];
 
-			qWestStar[i] = uWest[i] * hWestStar[i];
-			qEastStar[i] = uEast[i] * hEastStar[i];
-
-			zStar[i] = zStarIntermediate[i] - delta[i];
+			zWestStar[i] = zIntermediate - deltaWest[i];
+			zEastStar[i] = zIntermediate - deltaEast[i];
 		}
 
 		// initialising numerical fluxes
-		fluxHLL(assembledSolution.length, solverParameters, hWestStar, hEastStar, qWestStar, qEastStar, uWest, uEast, massFlux, momentumFlux);
+		fluxHLL(assembledSolution, solverParameters, hWestStar, hEastStar, qWestStar, qEastStar, massFlux, momentumFlux);
 
 		for (int i = 0; i < assembledSolution.length; i++)
 		{
 			// essentially 0th order projection but taking into account east/west locality
-			hBar[i] = (hEastStar[i] + hWestStar[i + 1]) / 2;
+			hBar[i] = (hWestStar[i + 1] + hEastStar[i]) / 2;
 
 			// 1st order projection
-			zBar[i] = (zStar[i + 1] - zStar[i]) / (2 * sqrt(C(3.0)));
+			zBar[i] = (zWestStar[i + 1] - zEastStar[i]) / (2 * sqrt(C(3.0)));
 		}
 
 		// FV1 operator increment, skip ghosts cells
@@ -524,17 +604,17 @@ int main()
 			if (!dry[i])
 			{
 				real massIncrement = -(1 / assembledSolution.dxLocalWithBC[i]) * (massFlux[i] - massFlux[i - 1]);
+
 				real momentumIncrement = -(1 / assembledSolution.dxLocalWithBC[i]) * (momentumFlux[i] - momentumFlux[i - 1] + 2 * sqrt(C(3.0)) * solverParameters.g * hBar[i - 1] * zBar[i - 1]);
 
 				assembledSolution.hWithBC[i] += dt * massIncrement;
-				assembledSolution.qWithBC[i] = (assembledSolution.hWithBC[i] > solverParameters.tolDry) ? assembledSolution.qWithBC[i] + dt * momentumIncrement : 0;
+				assembledSolution.qWithBC[i] = (assembledSolution.hWithBC[i] <= solverParameters.tolDry) ? 0 : assembledSolution.qWithBC[i] + dt * momentumIncrement;
 			}
 		}
 
 		// CFL time step adjustment
 		dt = 1e9;
 		real totalMass = 0;
-		steps++;
 
 		for (i = 1; i < assembledSolution.length + 1; i++)
 		{
@@ -548,14 +628,27 @@ int main()
 			totalMass += assembledSolution.hWithBC[i] * assembledSolution.dxLocalWithBC[i];
 		}
 
-	/*	for (i = 1; i < assembledSolution.length + 1; i++)
+		steps++;
+
+		if (steps % 10 == 0)
 		{
-			printf("%0.2f, ", assembledSolution.hWithBC[i]);
+			clock_t current = clock();
+			real time = (real)(current - start) / CLOCKS_PER_SEC * C(1000.0);
+
+			data << timeNow << "," << time << endl;
 		}
-		printf("\n");*/
-		//printf("Mass: %.17g, dt: %f, simulation time: %f s\n", totalMass, dt, timeNow);
-		printf("%d\n", assembledSolution.length);
+
+		printf("Length: %d, step: %d, time step: %.15f, mass: %.15f, progress: %.17f%%\n", assembledSolution.length, steps, dt, totalMass, timeNow / simulationParameters.simulationTime * 100);
 	}
+
+	clock_t current = clock();
+	real time = (real)(current - start) / CLOCKS_PER_SEC * C(1000.0);
+
+	data << timeNow << "," << time << endl;
+
+	data.close();
+
+	writeSolutionToFile(assembledSolution);
 
 	// delete buffers
 	delete[] xIntFine;
@@ -582,6 +675,7 @@ int main()
 	delete[] assembledSolution.hWithBC;
 	delete[] assembledSolution.zWithBC;
 	delete[] assembledSolution.dxLocalWithBC;
+	delete[] assembledSolution.x;
 	delete[] assembledSolution.activeIndices;
 
 	delete[] dxFlattened;
@@ -609,13 +703,11 @@ int main()
 	delete[] qEastStar;
 	delete[] hEastStar;
 
-	delete[] zStarIntermediate;
-	delete[] zStar;
+	delete[] zWestStar;
+	delete[] zEastStar;
 
-	delete[] uWest;
-	delete[] uEast;
-
-	delete[] delta;
+	delete[] deltaWest;
+	delete[] deltaEast;
 
 	delete[] massFlux;
 	delete[] momentumFlux;
@@ -625,17 +717,16 @@ int main()
 
 	clock_t end = clock();
 
-	real time = (real)(end - start) / CLOCKS_PER_SEC * C(1000.0);
-	printf("Execution time measured using clock(): %f ms\n", time);
+	real end_time = (real)(end - start) / CLOCKS_PER_SEC * C(1000.0);
+	printf("Execution time measured using clock(): %f ms\n", end_time);
 
 	return 0;
 }
 
-void printTree(SolverParameters solverParameters, int* significantDetails, int scaleCoeffsPerCell, int detailsPerCell)
+void printTree(SimulationParameters simulationParameters, SolverParameters solverParameters, int* significantDetails, int detailsPerCell)
 {
-	for (int c = 0; c < solverParameters.cells; c++)
+	for (int c = 0; c < simulationParameters.cells; c++)
 	{
-		int scaleStep = c * scaleCoeffsPerCell;
 		int detailStep = c * detailsPerCell;
 
 		for (int n = solverParameters.L - 1; n >= 0; n--)
@@ -655,9 +746,9 @@ void printTree(SolverParameters solverParameters, int* significantDetails, int s
 	}
 }
 
-void printTreeOfReals(SolverParameters solverParameters, real* normalisedDetails, int scaleCoeffsPerCell, int detailsPerCell)
+void printTreeOfReals(SimulationParameters simulationParameters, SolverParameters solverParameters, real* details, int detailsPerCell)
 {
-	for (int c = 0; c < solverParameters.cells; c++)
+	for (int c = 0; c < simulationParameters.cells; c++)
 	{
 		int detailStep = c * detailsPerCell;
 
@@ -668,7 +759,30 @@ void printTreeOfReals(SolverParameters solverParameters, real* normalisedDetails
 
 			for (int k = currentLevStart; k <= currentLevEnd; k++)
 			{
-				printf("| %0.2f |", normalisedDetails[detailStep + k]);
+				printf("| %.17f, %d |", (details[detailStep + k]), k);
+			}
+
+			printf("\n");
+		}
+
+		printf("\n");
+	}
+}
+
+void printScaleCoeffs(SimulationParameters simulationParameters, SolverParameters solverParameters, real* scaleCoeffs, int scaleCoeffsPerCell)
+{
+	for (int c = 0; c < simulationParameters.cells; c++)
+	{
+		int scaleStep = c * scaleCoeffsPerCell;
+
+		for (int n = solverParameters.L; n >= 0; n--)
+		{
+			int currentLevStart = (1 << n) - 1;
+			int currentLevEnd = (1 << (n + 1)) - 2;
+
+			for (int k = currentLevStart; k <= currentLevEnd; k++)
+			{
+				printf("| %.20g |", scaleCoeffs[scaleStep + k]);
 			}
 
 			printf("\n");

@@ -15,7 +15,7 @@ real bedDataConservative(real x_int)
 	}
 	else if (a > 8 && a < 12)
 	{
-		b = C(0.2) - C(0.05) * pow(a - 10, 2);
+		b = C(0.2) - C(0.05) * pow(a - C(10.0), 2);
 	}
 	else if (a > 39 && a < 46.5)
 	{
@@ -26,6 +26,5 @@ real bedDataConservative(real x_int)
 		b = 0; // this is safe because you're casting an int literal to a real
 	}
 
-	//return 0;
 	return b * 10;
 }

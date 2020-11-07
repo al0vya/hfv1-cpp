@@ -26,10 +26,15 @@
     <ClCompile Include="encodeScale.cpp" />
     <ClCompile Include="fluxHLL.cpp" />
     <ClCompile Include="frictionImplicit.cpp" />
-    <ClCompile Include="hInitial.cpp" />
+    <ClCompile Include="hInitialOvertopping.cpp" />
+    <ClCompile Include="hInitialConservative.cpp" />
     <ClCompile Include="mainProgram.cpp" />
     <ClCompile Include="qInitial.cpp" />
+    <ClCompile Include="set_boundary_conditions_for_test_case.cpp" />
+    <ClCompile Include="set_simulation_parameters_for_test_case.cpp" />
+    <ClCompile Include="set_solver_parameters_for_test_case.cpp" />
     <ClCompile Include="treeTraversalDecode.cpp" />
+    <ClCompile Include="writeSolutionToFile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssembledSolution.h" />
@@ -44,13 +49,18 @@
     <ClInclude Include="fluxHLL.h" />
     <ClInclude Include="frictionImplicit.h" />
     <ClInclude Include="decode2.h" />
-    <ClInclude Include="hInitial.h" />
+    <ClInclude Include="hInitialOvertopping.h" />
+    <ClInclude Include="hInitialConservative.h" />
     <ClInclude Include="maskFilterHaar.h" />
     <ClInclude Include="qInitial.h" />
     <ClInclude Include="real.h" />
+    <ClInclude Include="set_boundary_conditions_for_test_case.h" />
+    <ClInclude Include="set_simulation_parameters_for_test_case.h" />
+    <ClInclude Include="set_solver_parameters_for_test_case.h" />
     <ClInclude Include="simulationParameters.h" />
     <ClInclude Include="SolverParameters.h" />
     <ClInclude Include="treeTraversalDecode.h" />
+    <ClInclude Include="writeSolutionToFile.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
