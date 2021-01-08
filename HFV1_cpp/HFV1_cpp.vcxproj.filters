@@ -162,6 +162,27 @@
     <ClCompile Include="bed_data_c_property.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="load_fine_scale_coefficients.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="get_max_scale_coefficients.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="encoding.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="thresholding.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="regularisation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="extra_significance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="decoding.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="baselineMesh.h">
@@ -180,9 +201,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="real.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="simulationParameters.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SolverParameters.h">
@@ -348,6 +366,33 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="h_init_overtop.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Maxes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="load_fine_scale_coefficients.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SimulationParameters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="get_max_scale_coefficients.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="encoding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="thresholding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="regularisation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="extra_significance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="decoding.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

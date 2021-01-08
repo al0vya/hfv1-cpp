@@ -2,7 +2,7 @@
 
 int set_num_cells()
 {
-	std::cout << "Please select the number of cells.\n";
+	std::cout << "Please select the number of mother elements.\n";
 
 	int user_input_num_cells;
 

@@ -9,6 +9,11 @@
 // Solver steps
 #include "get_nodal_values.h"
 #include "get_modal_values.h"
+#include "encoding.h"
+#include "thresholding.h"
+#include "regularisation.h"
+#include "extra_significance.h"
+#include "decoding.h"
 #include "add_ghost_cells.h"
 #include "friction_update.h"
 #include "get_wet_dry_cells.h"
@@ -28,6 +33,7 @@
 #include "FlattenedScaleCoeffs.h"
 #include "FlattenedDetails.h"
 #include "AssembledSolution.h"
+#include "Maxes.h"
 
 // Sim/solver setters
 #include "set_simulation_parameters.h"
@@ -38,14 +44,10 @@
 #include "set_num_cells.h"
 #include "set_error_threshold_epsilon.h"
 
-#include "bedDataConservative.h"
-#include "hInitialConservative.h"
-#include "hInitialOvertopping.h"
-#include "qInitial.h"
-#include "friction_update.h"
-#include "fluxHLL.h"
-#include "encodeDetail.h"
-#include "encodeScale.h"
+// Wrapper functions
+#include "load_fine_scale_coefficients.h"
+#include "get_max_scale_coefficients.h"
+
 #include "decode1.h"
 #include "decode2.h"
 #include "treeTraversalDecode.h"
@@ -74,7 +76,6 @@ int main()
 	clock_t start = clock();
 
 	// quintessential for-loop index
-	int i;
 	int steps = 0;
 
 	int  test_case = set_test_case();
@@ -103,19 +104,20 @@ int main()
 	// Variables
 	int num_fine_cells = sim_params.cells * (1 << solver_params.L);
 
-	int scaleCoeffsPerCell = (1 << (solver_params.L + 1)) - 1;
-	int totalScaleCoeffs = scaleCoeffsPerCell * sim_params.cells;
+	int scale_coeffs_per_cell = (1 << (solver_params.L + 1)) - 1;
+	int num_scale_coeffs = scale_coeffs_per_cell * sim_params.cells;
 
-	int detailsPerCell = (1 << solver_params.L) - 1;
-	int totalDetails = detailsPerCell * sim_params.cells;
+	int details_per_cell = (1 << solver_params.L) - 1;
+	int num_details = details_per_cell * sim_params.cells;
 
-	assem_sol.length = 0;
+	assem_sol.length = num_fine_cells;
 
-	real qMax = 0;
-	real zMax = 0;
-	real etaMax = 0;
+	real dx_coarse = (sim_params.xmax - sim_params.xmin) / sim_params.cells;
+	real dx_fine = dx_coarse / (1 << solver_params.L);
 
-	bool firstStep = true;
+	Maxes maxes = {0, 0, 0};
+
+	bool first_time_step = true;
 	real timeNow = 0;
 	real dt = C(1e-4);
 
@@ -126,9 +128,10 @@ int main()
 	malloc_star_values(star_vals, num_fine_cells);
 	malloc_fluxes(fluxes, num_fine_cells);
 	malloc_bar_values(bar_vals, num_fine_cells);
-	malloc_scale_coefficients(scale_coeffs, totalScaleCoeffs);
-	malloc_details(details, totalDetails);
+	malloc_scale_coefficients(scale_coeffs, num_scale_coeffs);
+	malloc_details(details, num_details);
 
+	// Arrays
 	int* dry_cells = new int[num_fine_cells + 2];
 
 	real* eta_temp = new real[num_fine_cells + 2];
@@ -136,51 +139,46 @@ int main()
 	real* delta_west = new real[num_fine_cells + 1];
 	real* delta_east = new real[num_fine_cells + 1];
 
-	real dx_coarse = (sim_params.xmax - sim_params.xmin) / sim_params.cells;
-	real dx_fine = dx_coarse / (1 << solver_params.L);
+	
+	real* dx_flattened = new real[num_scale_coeffs];
+	real* x_coords = new real[num_scale_coeffs];
+	int* level_indices = new int[num_scale_coeffs];
 
-	real* dxFlattened = new real[totalScaleCoeffs];
-	real* xFlattened = new real[totalScaleCoeffs];
-	int* levelIndicesFlattened = new int[totalScaleCoeffs];
+	real* x_coarse = new real[sim_params.cells + 1]();
 
-	real* norm_details = new real[totalDetails];
-	int* sig_details = new int[totalDetails]();
-
-	// allocate true/false buffer for dry cells
-	bool* dry = new bool[num_fine_cells + 2]();
+	real* norm_details = new real[num_details];
+	int* sig_details = new int[num_details]();
 
 	// =========================================================== //
 
-	get_nodal_values(nodal_vals, sim_params, num_fine_cells, bcs, dx_fine, test_case);
-
-	real* xIntCoarse = new real[sim_params.cells + 1]();
+	get_nodal_values
+	(
+		nodal_vals, 
+		sim_params, 
+		num_fine_cells, 
+		bcs, 
+		dx_fine, 
+		test_case
+	);
 
 	// coarse mesh
-	for (i = 0; i < sim_params.cells + 1; i++)
-	{
-		xIntCoarse[i] = sim_params.xmin + dx_coarse * i;
-	}
+	for (int i = 0; i < sim_params.cells + 1; i++) x_coarse[i] = sim_params.xmin + dx_coarse * i;
+	
+	get_modal_values
+	(
+		assem_sol, 
+		nodal_vals, 
+		sim_params
+	);
 
-	// finest scale coefficients
-	for (i = 0; i < num_fine_cells; i++)
-	{
-		assem_sol.q_BC[i + 1] = (nodal_vals.q[i] + nodal_vals.q[i + 1]) / 2;
-		assem_sol.h_BC[i + 1] = (nodal_vals.h[i] + nodal_vals.h[i + 1]) / 2;
-		assem_sol.z_BC[i + 1] = (nodal_vals.z[i] + nodal_vals.z[i + 1]) / 2;
-	}
-
-	// load the fine scale data
-	for (int c = 0; c < sim_params.cells; c++)
-	{
-		int scaleStep = c * scaleCoeffsPerCell;
-
-		for (int k = 0; k < (1 << solver_params.L); k++)
-		{
-			scale_coeffs.q[scaleStep + (1 << solver_params.L) - 1 + k] = assem_sol.q_BC[c * (1 << solver_params.L) + k + 1];
-			scale_coeffs.eta[scaleStep + (1 << solver_params.L) - 1 + k] = assem_sol.h_BC[c * (1 << solver_params.L) + k + 1] + assem_sol.z_BC[c * (1 << solver_params.L) + k + 1];
-			scale_coeffs.z[scaleStep + (1 << solver_params.L) - 1 + k] = assem_sol.z_BC[c * (1 << solver_params.L) + k + 1];
-		}
-	}
+	load_fine_scale_coefficients
+	(
+		sim_params, 
+		solver_params, 
+		scale_coeffs_per_cell, 
+		assem_sol, 
+		scale_coeffs
+	);
 
 	while (timeNow < sim_params.simulationTime)
 	{
@@ -193,222 +191,80 @@ int main()
 			timeNow += dt;
 		}
 
-		// reset maxes
-		qMax = 0;
-		etaMax = 0;
-
-		if (firstStep)
-		{
-			for (i = 0; i < num_fine_cells; i++)
-			{
-				qMax = max(qMax, abs(assem_sol.q_BC[i + 1]));
-				zMax = max(zMax, abs(assem_sol.z_BC[i + 1]));
-				etaMax = max(etaMax, abs(assem_sol.h_BC[i + 1] + assem_sol.z_BC[i + 1]));
-			}
-		}
-		else
-		{
-			for (i = 0; i < assem_sol.length; i++)
-			{
-				real q = assem_sol.q_BC[i + 1];
-				real eta = assem_sol.h_BC[i + 1] + assem_sol.z_BC[i + 1];
-
-				scale_coeffs.q[assem_sol.activeIndices[i]] = q;
-				scale_coeffs.eta[assem_sol.activeIndices[i]] = eta;
-
-				qMax = max(qMax, abs(q));
-				etaMax = max(etaMax, abs(eta));
-			}
-		}
-
-		qMax = max(qMax, C(1.0));
-		etaMax = max(etaMax, C(1.0));
-		zMax = max(zMax, C(1.0));
+		maxes = get_max_scale_coefficients
+		(
+			maxes, 
+			num_fine_cells, 
+			assem_sol, 
+			first_time_step, 
+			scale_coeffs
+		);
 
 		// thresholding details to zero for next step
-		for (i = 0; i < totalDetails; i++)
+		for (int i = 0; i < num_details; i++)
 		{
 			details.q[i] = 0;
 			details.eta[i] = 0;
 		}
 
+		encoding
+		(
+			sim_params, 
+			scale_coeffs_per_cell, 
+			details_per_cell,
+			num_details,
+			solver_params, 
+			sig_details, 
+			scale_coeffs, 
+			details,
+			norm_details,
+			first_time_step,
+			maxes
+		);
 
-		// BEGIN ENCODING //
+		thresholding
+		(
+			sim_params, 
+			solver_params, 
+			scale_coeffs_per_cell, 
+			details_per_cell, 
+			norm_details, 
+			sig_details
+		);
 
-		for (int c = 0; c < sim_params.cells; c++)
-		{
-			int scaleStep = c * scaleCoeffsPerCell;
-			int detailStep = c * detailsPerCell;
+		regularisation
+		(
+			sim_params, 
+			solver_params, 
+			details_per_cell, 
+			sig_details
+		);
 
-			for (int n = solver_params.L - 1; n >= 0; n--)
-			{
-				int currentLevStart = (1 << n) - 1;
-				int currentLevEnd = (1 << (n + 1)) - 2;
-				int kHigher = currentLevEnd + 1;
+		extra_significance
+		(
+			sim_params, 
+			details_per_cell, 
+			solver_params, 
+			sig_details, 
+			norm_details
+		);
 
-				for (int k = currentLevStart; k <= currentLevEnd; k++)
-				{
-					if (sig_details[detailStep + k] || firstStep)
-					{
-						real q1 = scale_coeffs.q[scaleStep + kHigher];
-						real eta1 = scale_coeffs.eta[scaleStep + kHigher];
-
-						real q2 = scale_coeffs.q[scaleStep + kHigher + 1];
-						real eta2 = scale_coeffs.eta[scaleStep + kHigher + 1];
-
-						scale_coeffs.q[scaleStep + k] = encodeScale(q1, q2);
-						scale_coeffs.eta[scaleStep + k] = encodeScale(eta1, eta2);
-
-						details.q[detailStep + k] = encodeDetail(q1, q2);
-						details.eta[detailStep + k] = encodeDetail(eta1, eta2);
-
-						if (firstStep)
-						{
-							real z1 = scale_coeffs.z[scaleStep + kHigher];
-							real z2 = scale_coeffs.z[scaleStep + kHigher + 1];
-
-							scale_coeffs.z[scaleStep + k] = encodeScale(z1, z2);
-							details.z[detailStep + k] = encodeDetail(z1, z2);
-						}
-					}
-
-					kHigher += 2;
-				}
-			}
-		}
-
-		// END ENCODING //
-
-		firstStep = false;
-
-		// zero significant details to reconstruct tree of details for the next iteration and normalise details
-		for (i = 0; i < totalDetails; i++)
-		{
-			sig_details[i] = false;
-
-			real a = abs(details.q[i]) / qMax;
-			real b = abs(details.eta[i]) / etaMax;
-			real c = abs(details.z[i]) / zMax;
-
-			norm_details[i] = max(a, max(b, c));
-		}
-
-		// START PREDICTION //
-
-		for (int c = 0; c < sim_params.cells; c++)
-		{
-			int scaleStep = c * scaleCoeffsPerCell;
-			int detailStep = c * detailsPerCell;
-
-			for (int n = 0; n < solver_params.L; n++)
-			{
-				int currentLevStart = (1 << n) - 1;
-				int currentLevEnd = (1 << (n + 1)) - 2;
-
-				for (int k = currentLevStart; k <= currentLevEnd; k++)
-				{
-					real epsilonLocal = solver_params.epsilon / ( 1 << (solver_params.L - n) );
-
-					if (norm_details[detailStep + k] >= epsilonLocal)
-					{
-						sig_details[detailStep + k] = true;
-
-						if (c + 1 < sim_params.cells && k == currentLevEnd) // if it's not the last cell and at the right-most edge
-						{
-							sig_details[(c + 1) * detailsPerCell + currentLevStart] = true; // make the subelement to the right cell also significant
-						}
-
-						if (c > 0 && k == currentLevStart) // if it's not the first cell and at the left-most edge
-						{
-							sig_details[(c - 1) * detailsPerCell + currentLevEnd] = true; // the subelement on the left cell is also significant
-						}
-					}
-				}
-			}
-		}
-
-		// END PREDICTION //
-
-		
-
-		// START REGULARISATION //
-
-		for (int c = 0; c < sim_params.cells; c++)
-		{
-			int detailStep = c * detailsPerCell;
-
-			for (int n = solver_params.L; n > 1; n--)
-			{
-				int k = (1 << (n - 1)) - 1;
-				int kLower = (1 << (n - 2)) - 1;
-				int currentLevEnd = (1 << n) - 2;
-
-				for (k; k < currentLevEnd; k += 2)
-				{
-					if (sig_details[detailStep + k] || sig_details[detailStep + k + 1])
-					{
-						sig_details[detailStep + kLower] = true;
-					}
-
-					kLower++; // step along only the one parent element
-				}
-			}
-		}
-
-		// END REGULARISATION //
-
-		
-
-		// START EXTRA SIGNIFICANCE //
-
-		for (int c = 0; c < sim_params.cells; c++)
-		{
-			int detailStep = c * detailsPerCell;
-
-			for (int n = 0; n < solver_params.L; n++)
-			{
-				int currentLevStart = (1 << n) - 1;
-				int currentLevEnd = (1 << (n + 1)) - 2;
-				int kHigher = currentLevEnd + 1; // index of child element
-
-				for (int k = currentLevStart; k <= currentLevEnd; k++)
-				{
-					if (sig_details[detailStep + k])
-					{
-						real mBar = 1.5;
-						real epsilonLocal = solver_params.epsilon * pow(C(2.0), n - solver_params.L);
-
-						if (norm_details[detailStep + k] >= epsilonLocal * pow(C(2.0), mBar + 1) && n + 1 != solver_params.L)
-						{
-							// if extra signficant child elements marked as active
-							sig_details[detailStep + kHigher] = true;
-							sig_details[detailStep + kHigher + 1] = true;
-						}
-					}
-
-					kHigher += 2;
-				}
-			}
-		}
-
-		// END EXTRA SIGNIFICANCE //
-
-		// reset since passing by reference
-		assem_sol.length = 0;
-
-		for (int c = 0; c < sim_params.cells; c++)
-		{
-			int scaleStep = c * scaleCoeffsPerCell;
-			int detailStep = c * detailsPerCell;
-
-			xFlattened[scaleStep] = (xIntCoarse[c] + xIntCoarse[c + 1]) / 2;
-			dxFlattened[scaleStep] = dx_coarse;
-			levelIndicesFlattened[scaleStep] = 0;
-
-			// initially, n = k = 0
-			treeTraversalDecode(solver_params, scale_coeffs, dxFlattened, xFlattened, levelIndicesFlattened, details,
-				0, 0, detailStep, scaleStep, sig_details, assem_sol);
-		}
+		decoding
+		(
+			assem_sol, 
+			sim_params, 
+			scale_coeffs_per_cell, 
+			details_per_cell, 
+			x_coords, 
+			x_coarse, 
+			dx_flattened, 
+			dx_coarse, 
+			level_indices, 
+			sig_details, 
+			solver_params, 
+			scale_coeffs, 
+			details
+		);
 
 		add_ghost_cells
 		(
@@ -498,11 +354,11 @@ int main()
 	delete[] delta_west;
 	delete[] delta_east;
 
-	delete[] xIntCoarse;
+	delete[] x_coarse;
 
-	delete[] dxFlattened;
-	delete[] xFlattened;
-	delete[] levelIndicesFlattened;
+	delete[] dx_flattened;
+	delete[] x_coords;
+	delete[] level_indices;
 
 	delete[] norm_details;
 	delete[] sig_details;

@@ -7,7 +7,7 @@ void get_modal_values
 	SimulationParameters& sim_params
 )
 {
-	for (int i = 1; i < sim_params.cells + 1; i++)
+	for (int i = 1; i < assem_sol.length + 1; i++)
 	{
 		assem_sol.q_BC[i] = (nodal_vals.q[i - 1] + nodal_vals.q[i]) / 2;
 		assem_sol.h_BC[i] = (nodal_vals.h[i - 1] + nodal_vals.h[i]) / 2;

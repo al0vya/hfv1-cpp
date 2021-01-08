@@ -68,10 +68,37 @@ void treeTraversalDecode
 		levelIndicesFlattened[scaleStep + kHigher] = nHigher;
 		levelIndicesFlattened[scaleStep + kHigher + 1] = nHigher;
 
-		treeTraversalDecode(solverParameters, flattenedScaleCoeffs, dxFlattened, xFlattened, levelIndicesFlattened, flattenedDetails, 
-			n + 1, kHigher, detailStep, scaleStep, significantDetails, assembledSolution);
-		treeTraversalDecode(solverParameters, flattenedScaleCoeffs, dxFlattened, xFlattened, levelIndicesFlattened, flattenedDetails,
-			n + 1, kHigher + 1, detailStep, scaleStep, significantDetails, assembledSolution);
+		treeTraversalDecode
+		(
+			solverParameters, 
+			flattenedScaleCoeffs, 
+			dxFlattened, 
+			xFlattened, 
+			levelIndicesFlattened, 
+			flattenedDetails, 
+			n + 1, 
+			kHigher, 
+			detailStep, 
+			scaleStep, 
+			significantDetails, 
+			assembledSolution
+		);
+		
+		treeTraversalDecode
+		(
+			solverParameters,
+			flattenedScaleCoeffs,
+			dxFlattened,
+			xFlattened,
+			levelIndicesFlattened,
+			flattenedDetails,
+			n + 1,
+			kHigher + 1,
+			detailStep,
+			scaleStep,
+			significantDetails,
+			assembledSolution
+		);
 	}
 	else
 	{
