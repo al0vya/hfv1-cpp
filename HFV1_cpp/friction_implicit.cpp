@@ -1,10 +1,10 @@
-#include "frictionImplicit.h"
+#include "friction_implicit.h"
 
-real frictionImplicit(SimulationParameters simulationParameters, SolverParameters solverParameters, real dt, real h, real q)
+real friction_implicit(SimulationParameters simulationParameters, SolverParameters solverParameters, real dt, real h, real q)
 {
 	real u, Sf, D, Cf;
 
-	if (h > solverParameters.tolDry && abs(q) > solverParameters.tolDry)
+	if (h > solverParameters.tol_dry && abs(q) > solverParameters.tol_dry)
 	{
 		u = q / h;
 

@@ -1,6 +1,7 @@
 #include "treeTraversalDecode.h"
 
-void treeTraversalDecode(
+void treeTraversalDecode
+(
 	SolverParameters solverParameters,
 
 	FlattenedScaleCoeffs flattenedScaleCoeffs, 
@@ -19,7 +20,8 @@ void treeTraversalDecode(
 
 	int* significantDetails, 
 	
-	AssembledSolution &assembledSolution)
+	AssembledSolution& assembledSolution
+)
 {
 	// initially, n = 0 and k = 0 i.e. the coarsest sub-element
 	int currentLevStart = (1 << n) - 1;
@@ -82,10 +84,10 @@ void treeTraversalDecode(
 		real dxLocal = dxFlattened[scaleStep + k];
 		real x = xFlattened[scaleStep + k];
 
-		assembledSolution.qWithBC[idx + 1] = q;
-		assembledSolution.hWithBC[idx + 1] = eta - z;
-		assembledSolution.zWithBC[idx + 1] = z;
-		assembledSolution.dxLocalWithBC[idx + 1] = dxLocal;
+		assembledSolution.q_BC[idx + 1] = q;
+		assembledSolution.h_BC[idx + 1] = eta - z;
+		assembledSolution.z_BC[idx + 1] = z;
+		assembledSolution.dx_BC[idx + 1] = dxLocal;
 		assembledSolution.x[idx + 1] = x;
 		assembledSolution.activeIndices[idx] = scaleStep + k;
 		assembledSolution.length++;

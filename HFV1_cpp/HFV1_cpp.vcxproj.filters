@@ -21,9 +21,6 @@
     <ClCompile Include="fluxHLL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="frictionImplicit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="mainProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -45,22 +42,124 @@
     <ClCompile Include="treeTraversalDecode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="writeSolutionToFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="hInitialConservative.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="hInitialOvertopping.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="set_boundary_conditions_for_test_case.cpp">
+    <ClCompile Include="malloc_details.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="set_simulation_parameters_for_test_case.cpp">
+    <ClCompile Include="malloc_scale_coefficients.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="set_solver_parameters_for_test_case.cpp">
+    <ClCompile Include="malloc_assembled_solution.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="malloc_bar_values.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="malloc_face_values.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="malloc_fluxes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="malloc_nodal_values.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="malloc_star_values.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="free_assembled_solution.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="free_bar_values.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="free_face_values.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="free_fluxes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="free_nodal_values.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="free_star_values.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="get_bar_values.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="get_dt_CFL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="get_face_values.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="get_modal_values.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="get_nodal_values.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="get_positivity_preserving_nodes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="get_wet_dry_cells.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="add_ghost_cells.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="friction_implicit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="friction_update.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fv1_operator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="set_error_threshold_epsilon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="set_num_cells.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="set_test_case.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="write_solution_to_file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="set_solver_parameters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="set_simulation_parameters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="set_boundary_conditions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="free_details.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="free_scale_coefficients.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="set_max_refinement_lvl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="h_init_c_property.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="h_init_overtop.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bed_data_c_property.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -75,9 +174,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="fluxHLL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="frictionImplicit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="qInitial.h">
@@ -119,22 +215,139 @@
     <ClInclude Include="AssembledSolution.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="writeSolutionToFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="hInitialConservative.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="hInitialOvertopping.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="set_boundary_conditions_for_test_case.h">
+    <ClInclude Include="malloc_details.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="set_simulation_parameters_for_test_case.h">
+    <ClInclude Include="malloc_scale_coefficients.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="set_solver_parameters_for_test_case.h">
+    <ClInclude Include="malloc_assembled_solution.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="malloc_bar_values.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="malloc_face_values.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="malloc_fluxes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="malloc_nodal_values.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="malloc_star_values.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="free_assembled_solution.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="free_bar_values.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="free_face_values.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="free_fluxes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="free_nodal_values.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="free_star_values.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="get_bar_values.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="get_dt_CFL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="get_face_values.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="get_modal_values.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="get_nodal_values.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="get_positivity_preserving_nodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="get_wet_dry_cells.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="add_ghost_cells.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BarValues.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="encodeInitial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FaceValues.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Fluxes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="friction_implicit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="friction_update.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fv1_operator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NodalValues.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="set_error_threshold_epsilon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="set_num_cells.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="set_test_case.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StarValues.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="write_solution_to_file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="set_solver_parameters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="set_simulation_parameters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="set_boundary_conditions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="free_details.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="free_scale_coefficients.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="set_max_refinement_lvl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="h_init_c_property.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="h_init_overtop.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
