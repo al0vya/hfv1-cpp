@@ -8,7 +8,7 @@
 #include "FlattenedDetails.h"
 #include "FlattenedScaleCoeffs.h"
 
-void treeTraversalDecode(
+void traverse_tree_decode(
 	SolverParameters solverParameters,
 
 	FlattenedScaleCoeffs flattenedScaleCoeffs,

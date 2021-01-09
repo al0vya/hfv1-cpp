@@ -6,8 +6,8 @@
 #include "SolverParameters.h"
 #include "FlattenedScaleCoeffs.h"
 #include "FlattenedDetails.h"
-#include "encodeDetail.h"
-#include "encodeScale.h"
+#include "encode_detail.h"
+#include "encode_scale.h"
 #include "Maxes.h"
 
 void encoding

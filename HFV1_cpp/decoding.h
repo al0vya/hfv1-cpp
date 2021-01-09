@@ -4,7 +4,7 @@
 #include "SimulationParameters.h"
 #include "SolverParameters.h"
 #include "FlattenedDetails.h"
-#include "treeTraversalDecode.h"
+#include "traverse_tree_decode.h"
 #include "FlattenedScaleCoeffs.h"
 #include "FlattenedDetails.h"
 

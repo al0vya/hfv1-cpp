@@ -30,7 +30,7 @@ void decoding
 		levelIndicesFlattened[scaleStep] = 0;
 
 		// initially, n = k = 0
-		treeTraversalDecode
+		traverse_tree_decode
 		(
 			solver_params,
 			scale_coeffs,

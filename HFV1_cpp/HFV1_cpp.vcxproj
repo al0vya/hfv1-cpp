@@ -20,13 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="add_ghost_cells.cpp" />
-    <ClCompile Include="bedDataConservative.cpp" />
     <ClCompile Include="bed_data_c_property.cpp" />
     <ClCompile Include="decode1.cpp" />
     <ClCompile Include="decode2.cpp" />
     <ClCompile Include="decoding.cpp" />
-    <ClCompile Include="encodeDetail.cpp" />
-    <ClCompile Include="encodeScale.cpp" />
+    <ClCompile Include="encode_detail.cpp" />
+    <ClCompile Include="encode_scale.cpp" />
     <ClCompile Include="encoding.cpp" />
     <ClCompile Include="extra_significance.cpp" />
     <ClCompile Include="fluxHLL.cpp" />
@@ -49,12 +48,10 @@
     <ClCompile Include="get_nodal_values.cpp" />
     <ClCompile Include="get_positivity_preserving_nodes.cpp" />
     <ClCompile Include="get_wet_dry_cells.cpp" />
-    <ClCompile Include="hInitialOvertopping.cpp" />
-    <ClCompile Include="hInitialConservative.cpp" />
     <ClCompile Include="h_init_c_property.cpp" />
     <ClCompile Include="h_init_overtop.cpp" />
     <ClCompile Include="load_fine_scale_coefficients.cpp" />
-    <ClCompile Include="mainProgram.cpp" />
+    <ClCompile Include="MAIN.cpp" />
     <ClCompile Include="malloc_assembled_solution.cpp" />
     <ClCompile Include="malloc_bar_values.cpp" />
     <ClCompile Include="malloc_details.cpp" />
@@ -63,7 +60,6 @@
     <ClCompile Include="malloc_nodal_values.cpp" />
     <ClCompile Include="malloc_scale_coefficients.cpp" />
     <ClCompile Include="malloc_star_values.cpp" />
-    <ClCompile Include="qInitial.cpp" />
     <ClCompile Include="regularisation.cpp" />
     <ClCompile Include="set_boundary_conditions.cpp" />
     <ClCompile Include="set_error_threshold_epsilon.cpp" />
@@ -73,21 +69,18 @@
     <ClCompile Include="set_solver_parameters.cpp" />
     <ClCompile Include="set_test_case.cpp" />
     <ClCompile Include="thresholding.cpp" />
-    <ClCompile Include="treeTraversalDecode.cpp" />
+    <ClCompile Include="traverse_tree_decode.cpp" />
     <ClCompile Include="write_solution_to_file.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="add_ghost_cells.h" />
     <ClInclude Include="AssembledSolution.h" />
     <ClInclude Include="BarValues.h" />
-    <ClInclude Include="baselineMesh.h" />
-    <ClInclude Include="bedDataConservative.h" />
     <ClInclude Include="BoundaryConditions.h" />
     <ClInclude Include="decode1.h" />
     <ClInclude Include="decoding.h" />
-    <ClInclude Include="encodeDetail.h" />
-    <ClInclude Include="encodeInitial.h" />
-    <ClInclude Include="encodeScale.h" />
+    <ClInclude Include="encode_detail.h" />
+    <ClInclude Include="encode_scale.h" />
     <ClInclude Include="encoding.h" />
     <ClInclude Include="extra_significance.h" />
     <ClInclude Include="FaceValues.h" />
@@ -115,8 +108,6 @@
     <ClInclude Include="get_nodal_values.h" />
     <ClInclude Include="get_positivity_preserving_nodes.h" />
     <ClInclude Include="get_wet_dry_cells.h" />
-    <ClInclude Include="hInitialOvertopping.h" />
-    <ClInclude Include="hInitialConservative.h" />
     <ClInclude Include="h_init_c_property.h" />
     <ClInclude Include="h_init_overtop.h" />
     <ClInclude Include="load_fine_scale_coefficients.h" />
@@ -131,7 +122,6 @@
     <ClInclude Include="maskFilterHaar.h" />
     <ClInclude Include="Maxes.h" />
     <ClInclude Include="NodalValues.h" />
-    <ClInclude Include="qInitial.h" />
     <ClInclude Include="real.h" />
     <ClInclude Include="regularisation.h" />
     <ClInclude Include="set_boundary_conditions.h" />
@@ -145,7 +135,7 @@
     <ClInclude Include="SolverParameters.h" />
     <ClInclude Include="StarValues.h" />
     <ClInclude Include="thresholding.h" />
-    <ClInclude Include="treeTraversalDecode.h" />
+    <ClInclude Include="traverse_tree_decode.h" />
     <ClInclude Include="write_solution_to_file.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

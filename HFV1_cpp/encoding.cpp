@@ -44,19 +44,19 @@ void encoding
 					real q2 = scale_coeffs.q[scaleStep + kHigher + 1];
 					real eta2 = scale_coeffs.eta[scaleStep + kHigher + 1];
 
-					scale_coeffs.q[scaleStep + k] = encodeScale(q1, q2);
-					scale_coeffs.eta[scaleStep + k] = encodeScale(eta1, eta2);
+					scale_coeffs.q[scaleStep + k] = encode_scale(q1, q2);
+					scale_coeffs.eta[scaleStep + k] = encode_scale(eta1, eta2);
 
-					details.q[detailStep + k] = encodeDetail(q1, q2);
-					details.eta[detailStep + k] = encodeDetail(eta1, eta2);
+					details.q[detailStep + k] = encode_detail(q1, q2);
+					details.eta[detailStep + k] = encode_detail(eta1, eta2);
 
 					if (first_time_step)
 					{
 						real z1 = scale_coeffs.z[scaleStep + kHigher];
 						real z2 = scale_coeffs.z[scaleStep + kHigher + 1];
 
-						scale_coeffs.z[scaleStep + k] = encodeScale(z1, z2);
-						details.z[detailStep + k] = encodeDetail(z1, z2);
+						scale_coeffs.z[scaleStep + k] = encode_scale(z1, z2);
+						details.z[detailStep + k] = encode_detail(z1, z2);
 					}
 				}
 

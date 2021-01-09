@@ -15,37 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="bedDataConservative.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="fluxHLL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="mainProgram.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="qInitial.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="encodeScale.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="encodeDetail.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="decode1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="decode2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="treeTraversalDecode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="hInitialConservative.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="hInitialOvertopping.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="malloc_details.cpp">
@@ -183,21 +159,24 @@
     <ClCompile Include="decoding.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MAIN.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="encode_detail.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="encode_scale.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="traverse_tree_decode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="baselineMesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="bedDataConservative.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BoundaryConditions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="fluxHLL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="qInitial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="real.h">
@@ -209,19 +188,10 @@
     <ClInclude Include="maskFilterHaar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="encodeScale.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="encodeDetail.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="decode1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="decode2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="treeTraversalDecode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FlattenedScaleCoeffs.h">
@@ -231,12 +201,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AssembledSolution.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="hInitialConservative.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="hInitialOvertopping.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="malloc_details.h">
@@ -306,9 +270,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BarValues.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="encodeInitial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FaceValues.h">
@@ -393,6 +354,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="decoding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="encode_detail.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="encode_scale.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="traverse_tree_decode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

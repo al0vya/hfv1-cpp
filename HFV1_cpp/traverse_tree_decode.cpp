@@ -1,6 +1,6 @@
-#include "treeTraversalDecode.h"
+#include "traverse_tree_decode.h"
 
-void treeTraversalDecode
+void traverse_tree_decode
 (
 	SolverParameters solverParameters,
 
@@ -68,7 +68,7 @@ void treeTraversalDecode
 		levelIndicesFlattened[scaleStep + kHigher] = nHigher;
 		levelIndicesFlattened[scaleStep + kHigher + 1] = nHigher;
 
-		treeTraversalDecode
+		traverse_tree_decode
 		(
 			solverParameters, 
 			flattenedScaleCoeffs, 
@@ -84,7 +84,7 @@ void treeTraversalDecode
 			assembledSolution
 		);
 		
-		treeTraversalDecode
+		traverse_tree_decode
 		(
 			solverParameters,
 			flattenedScaleCoeffs,

@@ -1,4 +1,4 @@
 #pragma once
 #include "maskFilterHaar.h"
 
-real encodeDetail(real u1, real u2);
+real encode_detail(real u1, real u2);
