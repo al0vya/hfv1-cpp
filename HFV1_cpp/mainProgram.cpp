@@ -16,6 +16,7 @@
 #include "fv1_operator.h"
 #include "get_dt_CFL.h"
 
+// Aliases
 #include "real.h"
 
 // Structures
@@ -40,9 +41,7 @@
 #include "load_fine_scale_coefficients.h"
 #include "get_max_scale_coefficients.h"
 
-#include "decode1.h"
-#include "decode2.h"
-#include "treeTraversalDecode.h"
+// File input/output
 #include "write_solution_to_file.h"
 
 // Memory (de)allocators
@@ -65,15 +64,14 @@
 
 int main()
 {
-	clock_t start = clock();
-
-	// quintessential for-loop index
 	int steps = 0;
 
 	int  test_case        = set_test_case();
 	int  num_cells        = set_num_cells();
 	int  refinement_level = set_max_refinement_lvl();
 	real epsilon          = set_error_threshold_epsilon();
+
+	clock_t start = clock();
 
 	// =========================================================== //
 	// INITIALISATION OF VARIABLES AND INSTANTIATION OF STRUCTURES //
@@ -315,6 +313,8 @@ int main()
 			dt,
 			total_mass
 		);
+
+		steps++;
 
 		printf("Length: %d, step: %d, time step: %.15f, mass: %.1f, progress: %.17f%%\n", assem_sol.length, steps, dt, total_mass, timeNow / sim_params.simulationTime * 100);
 	}
