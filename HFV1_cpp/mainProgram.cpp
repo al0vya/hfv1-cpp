@@ -1,11 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <algorithm>
-#include <cmath>
-#include <iostream>
-#include <fstream>
-#include <time.h>
-
 // Solver steps
 #include "get_nodal_values.h"
 #include "get_modal_values.h"
