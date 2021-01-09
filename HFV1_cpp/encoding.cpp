@@ -16,6 +16,13 @@ void encoding
 
 )
 {
+	// thresholding details to zero for next step
+	for (int i = 0; i < num_details; i++)
+	{
+		details.q[i] = 0;
+		details.eta[i] = 0;
+	}
+	
 	for (int cell = 0; cell < sim_params.cells; cell++)
 	{
 		int scaleStep = cell * scale_coeffs_per_cell;

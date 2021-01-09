@@ -78,10 +78,10 @@ int main()
 	// quintessential for-loop index
 	int steps = 0;
 
-	int  test_case = set_test_case();
-	int  num_cells = set_num_cells();
+	int  test_case        = set_test_case();
+	int  num_cells        = set_num_cells();
 	int  refinement_level = set_max_refinement_lvl();
-	real epsilon = set_error_threshold_epsilon();
+	real epsilon          = set_error_threshold_epsilon();
 
 	// =========================================================== //
 	// INITIALISATION OF VARIABLES AND INSTANTIATION OF STRUCTURES //
@@ -100,6 +100,8 @@ int main()
 	BarValues            bar_vals;
 	FlattenedScaleCoeffs scale_coeffs;
 	FlattenedDetails     details;
+	Maxes                maxes = { 0, 0, 0 };
+
 	
 	// Variables
 	int num_fine_cells = sim_params.cells * (1 << solver_params.L);
@@ -114,8 +116,6 @@ int main()
 
 	real dx_coarse = (sim_params.xmax - sim_params.xmin) / sim_params.cells;
 	real dx_fine = dx_coarse / (1 << solver_params.L);
-
-	Maxes maxes = {0, 0, 0};
 
 	bool first_time_step = true;
 	real timeNow = 0;
@@ -132,22 +132,18 @@ int main()
 	malloc_details(details, num_details);
 
 	// Arrays
-	int* dry_cells = new int[num_fine_cells + 2];
-
-	real* eta_temp = new real[num_fine_cells + 2];
-
-	real* delta_west = new real[num_fine_cells + 1];
-	real* delta_east = new real[num_fine_cells + 1];
-
-	
 	real* dx_flattened = new real[num_scale_coeffs];
 	real* x_coords = new real[num_scale_coeffs];
 	int* level_indices = new int[num_scale_coeffs];
-
 	real* x_coarse = new real[sim_params.cells + 1]();
 
 	real* norm_details = new real[num_details];
-	int* sig_details = new int[num_details]();
+	int* sig_details = new int[num_details](); 
+	
+	int* dry_cells = new int[num_fine_cells + 2];
+	real* eta_temp = new real[num_fine_cells + 2];
+	real* delta_west = new real[num_fine_cells + 1];
+	real* delta_east = new real[num_fine_cells + 1];
 
 	// =========================================================== //
 
@@ -199,13 +195,6 @@ int main()
 			first_time_step, 
 			scale_coeffs
 		);
-
-		// thresholding details to zero for next step
-		for (int i = 0; i < num_details; i++)
-		{
-			details.q[i] = 0;
-			details.eta[i] = 0;
-		}
 
 		encoding
 		(
@@ -339,7 +328,6 @@ int main()
 	}
 
 	// delete buffers
-
 	free_nodal_values(nodal_vals);
 	free_assembled_solution(assem_sol);
 	free_face_values(face_vals);
@@ -349,19 +337,18 @@ int main()
 	free_scale_coefficients(scale_coeffs);
 	free_details(details);
 
-	delete[] dry_cells;
-	delete[] eta_temp;
-	delete[] delta_west;
-	delete[] delta_east;
-
 	delete[] x_coarse;
-
 	delete[] dx_flattened;
 	delete[] x_coords;
 	delete[] level_indices;
 
 	delete[] norm_details;
 	delete[] sig_details;
+
+	delete[] dry_cells;
+	delete[] eta_temp;
+	delete[] delta_west;
+	delete[] delta_east;
 
 	clock_t end = clock();
 
