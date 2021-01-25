@@ -2,7 +2,7 @@
 
 ## Model description
 
-This is a successor to the base shallow water model solver, <a href="https://github.com/al0vya/FV1_cpp/blob/master/README.md">FV1-CPU</a>. It consists of two paired parts: the multiresolution analysis (MRA) of 'Haar' wavelets and a finite volume (FV1) scheme, and is called 'HFV1-CPU'. HFV1-CPU is an *adaptive* solver and adapts the mesh to the solution by way of MRA. For example, it uses fine *sub*-elements in areas with high localised variation in water height, discharge and topography, and coarser sub-elements otherwise. 
+This is a successor to the base shallow water model solver, <a href="https://github.com/al0vya/FV1_cpp/blob/master/README.md">FV1-CPU</a> and is based on <a href="https://www.sciencedirect.com/science/article/pii/S0309170819301770">this paper</a>. It consists of two paired parts: the multiresolution analysis (MRA) of 'Haar' wavelets and a finite volume (FV1) scheme, and is called 'HFV1-CPU'. HFV1-CPU is an *adaptive* solver and adapts the mesh to the solution by way of MRA. For example, it uses fine *sub*-elements in areas with high localised variation in water height, discharge and topography, and coarser sub-elements otherwise. 
 
 ### Multiresolution analysis
 
