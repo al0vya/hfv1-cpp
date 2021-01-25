@@ -1,11 +1,8 @@
-1D adaptive finite volume solver, incorporating Haar wavelet adaptivity, for the shallow equations, Harten, Lax and van Leer approximate Riemann solver
+# HFV1-CPU
 
-6 test cases available.
+## Model description
 
-User inputs:
+This is a successor to the base shallow water model solver, <a href="https://github.com/al0vya/FV1_cpp/blob/master/README.md">FV1-CPU</a>. It consists of two paired parts: the multiresolution analysis (MRA) of 'Haar' wavelets and a finite volume (FV1) scheme, and is called 'HFV1-CPU'. HFV1-CPU is an *adaptive* solver and adapts the mesh to the solution by way of MRA. For example, it uses fine *sub*-elements in areas with high localised variation in water height, discharge and topography, and coarser sub-elements otherwise. MRA gives access to a set of 'details', which are compared against a user-input error threshold `epsilon` to decide whether finer or coarser sub-elements are used in the mesh. Smaller values of `epsilon` include finer sub-elements, whereas larger values of `epsilon` include coarser ones. The more fine sub-elements are used, the greater the accuracy of the solution but also the greater the computational cost: <a href="https://www.sciencedirect.com/science/article/pii/S0309170819301770">Kesserwani et al. 2019</a> recommended a value of 10e-3 to maintain a balance between accuracy and cost for flood modelling applications. The finest possible sub-element resolution is dictated by a user-input maximum refinement level `L`, which subdivides a *mother* element into 2^L sub-elements. For example, if a single mother element is used to model a domain 100 m in length using a maximum refinement level of 9, the mesh can comprise between 1 and 2^L sub-elements, and the finest possible resolution is 100 m / 2^9 = 0.195 m.
 
-- Number of mother elements on the adaptive mesh
-- Maximum refinement level dictating number of sub-elements per mother element
-- Error threshold to control the local resolution of the adaptive mesh; smaller values include finer sub-elements on the adaptive mesh: recommended value is 10e-3 (Kesserwani et al. 2019)
-
+## Running the model
 
