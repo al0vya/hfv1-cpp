@@ -19,3 +19,6 @@ HFV1-CPU has the same 6 test cases as <a href="https://github.com/al0vya/FV1_cpp
 
 ## Speedups relative to FV1-CPU
 
+Below are speedups of HFV1-CPU over FV1-CPU for a 40 s wet dam break simulation, run in release mode on a machine with an i5-8250U CPU.
+
+![speedups](/HFV1_cpp/adaptivity_speedup.png)
