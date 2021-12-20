@@ -13,261 +13,260 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\operator">
+      <UniqueIdentifier>{e385e0d6-72db-4c46-b8da-be4f61f53bd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\mra">
+      <UniqueIdentifier>{2beb7b39-3481-48d7-9f98-cf190620ca90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\input">
+      <UniqueIdentifier>{b57d8b66-4126-4d7b-980c-f8fcd4d6a565}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\output">
+      <UniqueIdentifier>{e653e67d-710e-4b12-b65f-1be89012a0df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\classes">
+      <UniqueIdentifier>{36cb94be-0ab2-42ee-bfda-ba779bfdc756}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="fluxHLL.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="operator\add_ghost_cells.cpp">
+      <Filter>Source Files\operator</Filter>
     </ClCompile>
-    <ClCompile Include="decode1.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="operator\bed_data_c_property.cpp">
+      <Filter>Source Files\operator</Filter>
     </ClCompile>
-    <ClCompile Include="decode2.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="operator\fluxHLL.cpp">
+      <Filter>Source Files\operator</Filter>
     </ClCompile>
-    <ClCompile Include="get_bar_values.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="operator\friction_implicit.cpp">
+      <Filter>Source Files\operator</Filter>
     </ClCompile>
-    <ClCompile Include="get_dt_CFL.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="operator\friction_update.cpp">
+      <Filter>Source Files\operator</Filter>
     </ClCompile>
-    <ClCompile Include="get_face_values.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="operator\fv1_operator.cpp">
+      <Filter>Source Files\operator</Filter>
     </ClCompile>
-    <ClCompile Include="get_modal_values.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="operator\get_bar_values.cpp">
+      <Filter>Source Files\operator</Filter>
     </ClCompile>
-    <ClCompile Include="get_nodal_values.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="operator\get_dt_CFL.cpp">
+      <Filter>Source Files\operator</Filter>
     </ClCompile>
-    <ClCompile Include="get_positivity_preserving_nodes.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="operator\get_face_values.cpp">
+      <Filter>Source Files\operator</Filter>
     </ClCompile>
-    <ClCompile Include="get_wet_dry_cells.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="operator\get_positivity_preserving_nodes.cpp">
+      <Filter>Source Files\operator</Filter>
     </ClCompile>
-    <ClCompile Include="add_ghost_cells.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="operator\get_wet_dry_cells.cpp">
+      <Filter>Source Files\operator</Filter>
     </ClCompile>
-    <ClCompile Include="friction_implicit.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="operator\h_init_c_property.cpp">
+      <Filter>Source Files\operator</Filter>
     </ClCompile>
-    <ClCompile Include="friction_update.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="operator\h_init_overtop.cpp">
+      <Filter>Source Files\operator</Filter>
     </ClCompile>
-    <ClCompile Include="fv1_operator.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="mra\decode1.cpp">
+      <Filter>Source Files\mra</Filter>
     </ClCompile>
-    <ClCompile Include="set_error_threshold_epsilon.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="mra\decode2.cpp">
+      <Filter>Source Files\mra</Filter>
     </ClCompile>
-    <ClCompile Include="set_num_cells.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="mra\decoding.cpp">
+      <Filter>Source Files\mra</Filter>
     </ClCompile>
-    <ClCompile Include="set_test_case.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="mra\encode_detail.cpp">
+      <Filter>Source Files\mra</Filter>
     </ClCompile>
-    <ClCompile Include="write_solution_to_file.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="mra\encode_scale.cpp">
+      <Filter>Source Files\mra</Filter>
     </ClCompile>
-    <ClCompile Include="set_solver_parameters.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="mra\encoding.cpp">
+      <Filter>Source Files\mra</Filter>
     </ClCompile>
-    <ClCompile Include="set_simulation_parameters.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="mra\extra_significance.cpp">
+      <Filter>Source Files\mra</Filter>
     </ClCompile>
-    <ClCompile Include="set_boundary_conditions.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="mra\get_max_scale_coefficients.cpp">
+      <Filter>Source Files\mra</Filter>
     </ClCompile>
-    <ClCompile Include="set_max_refinement_lvl.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="mra\get_modal_values.cpp">
+      <Filter>Source Files\mra</Filter>
     </ClCompile>
-    <ClCompile Include="h_init_c_property.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="mra\get_nodal_values.cpp">
+      <Filter>Source Files\mra</Filter>
     </ClCompile>
-    <ClCompile Include="h_init_overtop.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="mra\load_fine_scale_coefficients.cpp">
+      <Filter>Source Files\mra</Filter>
     </ClCompile>
-    <ClCompile Include="bed_data_c_property.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="mra\regularisation.cpp">
+      <Filter>Source Files\mra</Filter>
     </ClCompile>
-    <ClCompile Include="load_fine_scale_coefficients.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="mra\thresholding.cpp">
+      <Filter>Source Files\mra</Filter>
     </ClCompile>
-    <ClCompile Include="get_max_scale_coefficients.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="mra\traverse_tree_decode.cpp">
+      <Filter>Source Files\mra</Filter>
     </ClCompile>
-    <ClCompile Include="encoding.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="input\set_boundary_conditions.cpp">
+      <Filter>Source Files\input</Filter>
     </ClCompile>
-    <ClCompile Include="thresholding.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="input\set_simulation_parameters.cpp">
+      <Filter>Source Files\input</Filter>
     </ClCompile>
-    <ClCompile Include="regularisation.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="input\set_solver_parameters.cpp">
+      <Filter>Source Files\input</Filter>
     </ClCompile>
-    <ClCompile Include="extra_significance.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="decoding.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="output\write_solution_to_file.cpp">
+      <Filter>Source Files\output</Filter>
     </ClCompile>
     <ClCompile Include="MAIN.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="encode_detail.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="encode_scale.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="traverse_tree_decode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BoundaryConditions.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="operator\add_ghost_cells.h">
+      <Filter>Source Files\operator</Filter>
     </ClInclude>
-    <ClInclude Include="fluxHLL.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="operator\bed_data_c_property.h">
+      <Filter>Source Files\operator</Filter>
     </ClInclude>
-    <ClInclude Include="real.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="operator\fluxHLL.h">
+      <Filter>Source Files\operator</Filter>
     </ClInclude>
-    <ClInclude Include="SolverParameters.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="operator\friction_implicit.h">
+      <Filter>Source Files\operator</Filter>
     </ClInclude>
-    <ClInclude Include="maskFilterHaar.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="operator\friction_update.h">
+      <Filter>Source Files\operator</Filter>
     </ClInclude>
-    <ClInclude Include="decode1.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="operator\fv1_operator.h">
+      <Filter>Source Files\operator</Filter>
     </ClInclude>
-    <ClInclude Include="decode2.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="operator\get_bar_values.h">
+      <Filter>Source Files\operator</Filter>
     </ClInclude>
-    <ClInclude Include="FlattenedScaleCoeffs.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="operator\get_dt_CFL.h">
+      <Filter>Source Files\operator</Filter>
     </ClInclude>
-    <ClInclude Include="FlattenedDetails.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="operator\get_face_values.h">
+      <Filter>Source Files\operator</Filter>
     </ClInclude>
-    <ClInclude Include="AssembledSolution.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="operator\get_positivity_preserving_nodes.h">
+      <Filter>Source Files\operator</Filter>
     </ClInclude>
-    <ClInclude Include="get_bar_values.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="operator\get_wet_dry_cells.h">
+      <Filter>Source Files\operator</Filter>
     </ClInclude>
-    <ClInclude Include="get_dt_CFL.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="operator\h_init_c_property.h">
+      <Filter>Source Files\operator</Filter>
     </ClInclude>
-    <ClInclude Include="get_face_values.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="operator\h_init_overtop.h">
+      <Filter>Source Files\operator</Filter>
     </ClInclude>
-    <ClInclude Include="get_modal_values.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="mra\decode1.h">
+      <Filter>Source Files\mra</Filter>
     </ClInclude>
-    <ClInclude Include="get_nodal_values.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="mra\decode2.h">
+      <Filter>Source Files\mra</Filter>
     </ClInclude>
-    <ClInclude Include="get_positivity_preserving_nodes.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="mra\decoding.h">
+      <Filter>Source Files\mra</Filter>
     </ClInclude>
-    <ClInclude Include="get_wet_dry_cells.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="mra\encode_detail.h">
+      <Filter>Source Files\mra</Filter>
     </ClInclude>
-    <ClInclude Include="add_ghost_cells.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="mra\encode_scale.h">
+      <Filter>Source Files\mra</Filter>
     </ClInclude>
-    <ClInclude Include="BarValues.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="mra\encoding.h">
+      <Filter>Source Files\mra</Filter>
     </ClInclude>
-    <ClInclude Include="FaceValues.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="mra\extra_significance.h">
+      <Filter>Source Files\mra</Filter>
     </ClInclude>
-    <ClInclude Include="Fluxes.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="mra\get_max_scale_coefficients.h">
+      <Filter>Source Files\mra</Filter>
     </ClInclude>
-    <ClInclude Include="friction_implicit.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="mra\get_modal_values.h">
+      <Filter>Source Files\mra</Filter>
     </ClInclude>
-    <ClInclude Include="friction_update.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="mra\get_nodal_values.h">
+      <Filter>Source Files\mra</Filter>
     </ClInclude>
-    <ClInclude Include="fv1_operator.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="mra\load_fine_scale_coefficients.h">
+      <Filter>Source Files\mra</Filter>
     </ClInclude>
-    <ClInclude Include="NodalValues.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="mra\maskFilterHaar.h">
+      <Filter>Source Files\mra</Filter>
     </ClInclude>
-    <ClInclude Include="set_error_threshold_epsilon.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="mra\regularisation.h">
+      <Filter>Source Files\mra</Filter>
     </ClInclude>
-    <ClInclude Include="set_num_cells.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="mra\thresholding.h">
+      <Filter>Source Files\mra</Filter>
     </ClInclude>
-    <ClInclude Include="set_test_case.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="mra\traverse_tree_decode.h">
+      <Filter>Source Files\mra</Filter>
     </ClInclude>
-    <ClInclude Include="StarValues.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="input\set_boundary_conditions.h">
+      <Filter>Source Files\input</Filter>
     </ClInclude>
-    <ClInclude Include="write_solution_to_file.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="input\set_simulation_parameters.h">
+      <Filter>Source Files\input</Filter>
     </ClInclude>
-    <ClInclude Include="set_solver_parameters.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="input\set_solver_parameters.h">
+      <Filter>Source Files\input</Filter>
     </ClInclude>
-    <ClInclude Include="set_simulation_parameters.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="output\write_solution_to_file.h">
+      <Filter>Source Files\output</Filter>
     </ClInclude>
-    <ClInclude Include="set_boundary_conditions.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="classes\AssembledSolution.h">
+      <Filter>Source Files\classes</Filter>
     </ClInclude>
-    <ClInclude Include="set_max_refinement_lvl.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="classes\BarValues.h">
+      <Filter>Source Files\classes</Filter>
     </ClInclude>
-    <ClInclude Include="h_init_c_property.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="classes\BoundaryConditions.h">
+      <Filter>Source Files\classes</Filter>
     </ClInclude>
-    <ClInclude Include="h_init_overtop.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="classes\FaceValues.h">
+      <Filter>Source Files\classes</Filter>
     </ClInclude>
-    <ClInclude Include="Maxes.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="classes\FlattenedDetails.h">
+      <Filter>Source Files\classes</Filter>
     </ClInclude>
-    <ClInclude Include="load_fine_scale_coefficients.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="classes\FlattenedScaleCoeffs.h">
+      <Filter>Source Files\classes</Filter>
     </ClInclude>
-    <ClInclude Include="SimulationParameters.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="classes\Fluxes.h">
+      <Filter>Source Files\classes</Filter>
     </ClInclude>
-    <ClInclude Include="get_max_scale_coefficients.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="classes\Maxes.h">
+      <Filter>Source Files\classes</Filter>
     </ClInclude>
-    <ClInclude Include="encoding.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="classes\NodalValues.h">
+      <Filter>Source Files\classes</Filter>
     </ClInclude>
-    <ClInclude Include="thresholding.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="classes\real.h">
+      <Filter>Source Files\classes</Filter>
     </ClInclude>
-    <ClInclude Include="regularisation.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="classes\simulationParameters.h">
+      <Filter>Source Files\classes</Filter>
     </ClInclude>
-    <ClInclude Include="extra_significance.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="classes\SolverParameters.h">
+      <Filter>Source Files\classes</Filter>
     </ClInclude>
-    <ClInclude Include="decoding.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="classes\StarValues.h">
+      <Filter>Source Files\classes</Filter>
     </ClInclude>
-    <ClInclude Include="encode_detail.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="encode_scale.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="traverse_tree_decode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="mra\decodeWithVector_pastebin.txt">
+      <Filter>Source Files\mra</Filter>
+    </Text>
   </ItemGroup>
 </Project>
