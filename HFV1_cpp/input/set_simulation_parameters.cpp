@@ -1,5 +1,4 @@
 #include "set_simulation_parameters.h"
-#include "real.h"
 
 SimulationParameters set_simulation_parameters(int test_case_selection, int num_cells)
 {

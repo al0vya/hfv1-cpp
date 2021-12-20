@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SolverParameters.h"
+#include "../classes/SolverParameters.h"
 
 SolverParameters set_solver_parameters
 (

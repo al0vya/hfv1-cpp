@@ -2,9 +2,9 @@
 
 #include <algorithm>
 
-#include "SimulationParameters.h"
-#include "AssembledSolution.h"
-#include "SolverParameters.h"
+#include "../classes/SimulationParameters.h"
+#include "../classes/AssembledSolution.h"
+#include "../classes/SolverParameters.h"
 
 void get_wet_dry_cells
 (

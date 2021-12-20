@@ -1,12 +1,12 @@
 #pragma once
 
-#include "AssembledSolution.h"
-#include "SimulationParameters.h"
-#include "SolverParameters.h"
-#include "FlattenedDetails.h"
+#include "../classes/AssembledSolution.h"
+#include "../classes/SimulationParameters.h"
+#include "../classes/SolverParameters.h"
+#include "../classes/FlattenedDetails.h"
 #include "traverse_tree_decode.h"
-#include "FlattenedScaleCoeffs.h"
-#include "FlattenedDetails.h"
+#include "../classes/FlattenedScaleCoeffs.h"
+#include "../classes/FlattenedDetails.h"
 
 void decoding
 (

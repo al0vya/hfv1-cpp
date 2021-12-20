@@ -1,9 +1,9 @@
 #pragma once
 
-#include "SolverParameters.h"
-#include "SimulationParameters.h"
-#include "FlattenedScaleCoeffs.h"
-#include "AssembledSolution.h"
+#include "../classes/SolverParameters.h"
+#include "../classes/SimulationParameters.h"
+#include "../classes/FlattenedScaleCoeffs.h"
+#include "../classes/AssembledSolution.h"
 
 void load_fine_scale_coefficients
 (

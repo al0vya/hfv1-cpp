@@ -1,44 +1,32 @@
 // Solver steps
-#include "get_nodal_values.h"
-#include "get_modal_values.h"
-#include "encoding.h"
-#include "thresholding.h"
-#include "regularisation.h"
-#include "extra_significance.h"
-#include "decoding.h"
-#include "add_ghost_cells.h"
-#include "friction_update.h"
-#include "get_wet_dry_cells.h"
-#include "get_face_values.h"
-#include "get_positivity_preserving_nodes.h"
-#include "fluxHLL.h"
-#include "get_bar_values.h"
-#include "fv1_operator.h"
-#include "get_dt_CFL.h"
-
-// Aliases
-#include "real.h"
-
-// Structures
-#include "SimulationParameters.h"
-#include "SolverParameters.h"
-#include "BoundaryConditions.h"
-#include "FlattenedScaleCoeffs.h"
-#include "FlattenedDetails.h"
-#include "AssembledSolution.h"
-#include "Maxes.h"
+#include "mra/get_nodal_values.h"
+#include "mra/get_modal_values.h"
+#include "mra/encoding.h"
+#include "mra/thresholding.h"
+#include "mra/regularisation.h"
+#include "mra/extra_significance.h"
+#include "mra/decoding.h"
+#include "operator/add_ghost_cells.h"
+#include "operator/friction_update.h"
+#include "operator/get_wet_dry_cells.h"
+#include "operator/get_face_values.h"
+#include "operator/get_positivity_preserving_nodes.h"
+#include "operator/fluxHLL.h"
+#include "operator/get_bar_values.h"
+#include "operator/fv1_operator.h"
+#include "operator/get_dt_CFL.h"
 
 // Sim/solver setters
-#include "set_simulation_parameters.h"
-#include "set_solver_parameters.h"
-#include "set_boundary_conditions.h"
+#include "input/set_simulation_parameters.h"
+#include "input/set_solver_parameters.h"
+#include "input/set_boundary_conditions.h"
 
 // Wrapper functions
-#include "load_fine_scale_coefficients.h"
-#include "get_max_scale_coefficients.h"
+#include "mra/load_fine_scale_coefficients.h"
+#include "mra/get_max_scale_coefficients.h"
 
 // File input/output
-#include "write_solution_to_file.h"
+#include "output/write_solution_to_file.h"
 
 int main
 (

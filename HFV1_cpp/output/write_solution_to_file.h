@@ -2,8 +2,8 @@
 
 #include <fstream>
 
-#include "SimulationParameters.h"
-#include "AssembledSolution.h"
+#include "../classes/SimulationParameters.h"
+#include "../classes/AssembledSolution.h"
 
 void write_solution_to_file
 (

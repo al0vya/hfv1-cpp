@@ -8,15 +8,14 @@ import matplotlib.pylab  as pylab
 
 from mpl_toolkits.mplot3d import Axes3D
 
-params = {
-    "legend.fontsize" : "xx-large",
-    "axes.labelsize"  : "xx-large",
-    "axes.titlesize"  : "xx-large",
-    "xtick.labelsize" : "xx-large",
-    "ytick.labelsize" : "xx-large"
-}
-
-pylab.rcParams.update(params)
+def EXIT_HELP():
+    help_message = (
+        "Use as:\n\n" +
+        "python test.py plot <MODE>\n" +
+        "MODE : [debug,release]"
+    )
+    
+    sys.exit(help_message)
 
 def plot_soln(
         x1,
@@ -46,13 +45,25 @@ def plot_soln(
 
 class Solution:
     def __init__(
-        self
+        self,
+        mode
     ):
-        self.x1  = pd.read_csv("solution_data.csv")["x1"].values
-        self.x2  = pd.read_csv("solution_data.csv")["x2"].values
-        self.q   = pd.read_csv("solution_data.csv")["q"].values
-        self.z   = pd.read_csv("solution_data.csv")["z"].values
-        self.eta = pd.read_csv("solution_data.csv")["eta"].values
+        if   mode == "debug":
+            path = os.path.join(os.path.dirname(__file__), "..", "x64", "Debug", "solution_data.csv")
+        elif mode == "release":
+            path = os.path.join(os.path.dirname(__file__), "..", "x64", "Release", "solution_data.csv")
+        else:
+            EXIT_HELP()
+        
+        print("Searching for solution data in", path)
+        
+        dataframe = pd.read_csv(path)
+        
+        self.x1  = dataframe["x1"].values
+        self.x2  = dataframe["x2"].values
+        self.q   = dataframe["q"].values
+        self.z   = dataframe["z"].values
+        self.eta = dataframe["eta"].values
         
         self.length = self.x1.size
         
@@ -62,5 +73,34 @@ class Solution:
         plot_soln(self.x1, self.x2, self.q,   "q",   self.length, "$q \, (m^2s^{-1})$")
         plot_soln(self.x1, self.x2, self.eta, "eta", self.length, "$\eta \, (m)$")
         plot_soln(self.x1, self.x2, self.z,   "z",   self.length, "$z \, (m)$")
+    
+def plot():
+    if len(sys.argv) > 2:
+        dummy, action, mode = sys.argv
         
-Solution().plot_soln()
+        Solution(mode).plot_soln()
+    else:
+        EXIT_HELP()
+        
+params = {
+    "legend.fontsize" : "xx-large",
+    "axes.labelsize"  : "xx-large",
+    "axes.titlesize"  : "xx-large",
+    "xtick.labelsize" : "xx-large",
+    "ytick.labelsize" : "xx-large"
+}
+
+pylab.rcParams.update(params)
+
+if len(sys.argv) > 1:
+    action = sys.argv[1]
+    
+    if action == "plot":
+        plot()
+    else:
+        EXIT_HELP()
+else:
+    EXIT_HELP()
+   
+
+

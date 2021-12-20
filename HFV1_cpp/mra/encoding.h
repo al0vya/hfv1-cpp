@@ -2,13 +2,13 @@
 
 #include <algorithm>
 
-#include "SimulationParameters.h"
-#include "SolverParameters.h"
-#include "FlattenedScaleCoeffs.h"
-#include "FlattenedDetails.h"
+#include "../classes/SimulationParameters.h"
+#include "../classes/SolverParameters.h"
+#include "../classes/FlattenedScaleCoeffs.h"
+#include "../classes/FlattenedDetails.h"
 #include "encode_detail.h"
 #include "encode_scale.h"
-#include "Maxes.h"
+#include "../classes/Maxes.h"
 
 void encoding
 (

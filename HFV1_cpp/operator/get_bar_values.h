@@ -2,9 +2,9 @@
 
 #include <algorithm>
 
-#include "StarValues.h"
-#include "AssembledSolution.h"
-#include "BarValues.h"
+#include "../classes/StarValues.h"
+#include "../classes/AssembledSolution.h"
+#include "../classes/BarValues.h"
 
 void get_bar_values
 (

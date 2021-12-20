@@ -2,11 +2,11 @@
 
 #include <algorithm>
 
-#include "SimulationParameters.h"
-#include "AssembledSolution.h"
-#include "SolverParameters.h"
-#include "FaceValues.h"
-#include "StarValues.h"
+#include "../classes/SimulationParameters.h"
+#include "../classes/AssembledSolution.h"
+#include "../classes/SolverParameters.h"
+#include "../classes/FaceValues.h"
+#include "../classes/StarValues.h"
 
 void get_positivity_preserving_nodes
 (

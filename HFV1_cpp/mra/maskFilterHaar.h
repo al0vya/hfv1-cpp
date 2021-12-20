@@ -1,7 +1,8 @@
 #pragma once
 
 #include <cmath>
-#include "real.h"
+
+#include "../classes/real.h"
 
 using namespace std;
 

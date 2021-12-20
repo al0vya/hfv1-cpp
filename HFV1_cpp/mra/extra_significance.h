@@ -2,8 +2,8 @@
 
 #include <cmath>
 
-#include "SimulationParameters.h"
-#include "SolverParameters.h"
+#include "../classes/SimulationParameters.h"
+#include "../classes/SolverParameters.h"
 
 void extra_significance
 (

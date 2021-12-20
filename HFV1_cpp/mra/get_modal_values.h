@@ -1,8 +1,8 @@
 #pragma once
 
-#include "AssembledSolution.h"
-#include "NodalValues.h"
-#include "SimulationParameters.h"
+#include "../classes/AssembledSolution.h"
+#include "../classes/NodalValues.h"
+#include "../classes/SimulationParameters.h"
 
 void get_modal_values
 (

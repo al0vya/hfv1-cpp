@@ -2,9 +2,9 @@
 
 #include <algorithm>
 
-#include "Maxes.h"
-#include "AssembledSolution.h"
-#include "FlattenedScaleCoeffs.h"
+#include "../classes/Maxes.h"
+#include "../classes/AssembledSolution.h"
+#include "../classes/FlattenedScaleCoeffs.h"
 
 Maxes get_max_scale_coefficients
 (

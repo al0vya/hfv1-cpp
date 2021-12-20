@@ -1,6 +1,6 @@
 #pragma once
 
-#include "real.h"
+#include "../classes/real.h"
 
 typedef struct SimulationParameters
 {
