@@ -32,10 +32,6 @@
 #include "set_simulation_parameters.h"
 #include "set_solver_parameters.h"
 #include "set_boundary_conditions.h"
-#include "set_max_refinement_lvl.h"
-#include "set_test_case.h"
-#include "set_num_cells.h"
-#include "set_error_threshold_epsilon.h"
 
 // Wrapper functions
 #include "load_fine_scale_coefficients.h"
@@ -44,32 +40,29 @@
 // File input/output
 #include "write_solution_to_file.h"
 
-// Memory (de)allocators
-#include "malloc_fluxes.h"
-#include "malloc_assembled_solution.h"
-#include "malloc_bar_values.h"
-#include "malloc_details.h"
-#include "malloc_nodal_values.h"
-#include "malloc_star_values.h"
-#include "malloc_scale_coefficients.h"
-#include "malloc_face_values.h"
-#include "free_fluxes.h"
-#include "free_assembled_solution.h"
-#include "free_bar_values.h"
-#include "free_details.h"
-#include "free_nodal_values.h"
-#include "free_star_values.h"
-#include "free_scale_coefficients.h"
-#include "free_face_values.h"
-
-int main()
+int main
+(
+	int    argc,
+	char** argv
+)
 {
+	if (argc < 5)
+	{
+		printf
+		(
+			"Please run in the command line as follows:\n\n"
+			"HFV1_cpp.exe <TEST_CASE> <NUM_CELLS> <MAX_REF_LVL> <EPSILON>"
+		);
+
+		exit(-1);
+	}
+	
 	int steps = 0;
 
-	int  test_case        = set_test_case();
-	int  num_cells        = set_num_cells();
-	int  refinement_level = set_max_refinement_lvl();
-	real epsilon          = set_error_threshold_epsilon();
+	int  test_case        = strtol(argv[1], nullptr, 10); //set_test_case();
+	int  num_cells        = strtol(argv[2], nullptr, 10); //set_num_cells();
+	int  refinement_level = strtol(argv[3], nullptr, 10); //set_max_refinement_lvl();
+	real epsilon          = strtof(argv[4], nullptr    ); //set_error_threshold_epsilon();
 
 	clock_t start = clock();
 
@@ -82,17 +75,6 @@ int main()
 	SolverParameters     solver_params = set_solver_parameters(epsilon, refinement_level);
 	BoundaryConditions   bcs           = set_boundary_conditions(test_case);
 
-	NodalValues          nodal_vals;
-	AssembledSolution    assem_sol;
-	FaceValues           face_vals;
-	StarValues           star_vals;
-	Fluxes               fluxes;
-	BarValues            bar_vals;
-	FlattenedScaleCoeffs scale_coeffs;
-	FlattenedDetails     details;
-	Maxes                maxes = { 0, 0, 0 };
-
-	
 	// Variables
 	int num_fine_cells = sim_params.cells * (1 << solver_params.L);
 
@@ -102,8 +84,6 @@ int main()
 	int details_per_cell = (1 << solver_params.L) - 1;
 	int num_details = details_per_cell * sim_params.cells;
 
-	assem_sol.length = num_fine_cells;
-
 	real dx_coarse = (sim_params.xmax - sim_params.xmin) / sim_params.cells;
 	real dx_fine = dx_coarse / (1 << solver_params.L);
 
@@ -111,29 +91,27 @@ int main()
 	real timeNow = 0;
 	real dt = C(1e-4);
 
-	// Memory allocation
-	malloc_nodal_values(nodal_vals, num_fine_cells);
-	malloc_assembled_solution(assem_sol, num_fine_cells);
-	malloc_face_values(face_vals, num_fine_cells);
-	malloc_star_values(star_vals, num_fine_cells);
-	malloc_fluxes(fluxes, num_fine_cells);
-	malloc_bar_values(bar_vals, num_fine_cells);
-	malloc_scale_coefficients(scale_coeffs, num_scale_coeffs);
-	malloc_details(details, num_details);
+	NodalValues          nodal_vals(num_fine_cells + 1);
+	AssembledSolution    assem_sol(num_fine_cells + 2);
+	FaceValues           face_vals(num_fine_cells + 1);
+	StarValues           star_vals(num_fine_cells + 1);
+	Fluxes               fluxes(num_fine_cells + 1);
+	BarValues            bar_vals(num_fine_cells);
+	FlattenedScaleCoeffs scale_coeffs(num_scale_coeffs);
+	FlattenedDetails     details(num_details);
+	Maxes                maxes = { 0, 0, 0 };
 
 	// Arrays
-	real* dx_flattened = new real[num_scale_coeffs];
-	real* x_coords = new real[num_scale_coeffs];
-	int* level_indices = new int[num_scale_coeffs];
-	real* x_coarse = new real[sim_params.cells + 1]();
-
-	real* norm_details = new real[num_details];
-	int* sig_details = new int[num_details](); 
-	
-	int* dry_cells = new int[num_fine_cells + 2];
-	real* eta_temp = new real[num_fine_cells + 2];
-	real* delta_west = new real[num_fine_cells + 1];
-	real* delta_east = new real[num_fine_cells + 1];
+	real* dx_flattened  = new real[num_scale_coeffs];
+	real* x_coords      = new real[num_scale_coeffs];
+	int*  level_indices = new int[num_scale_coeffs];
+	real* x_coarse      = new real[sim_params.cells + 1]();
+	real* norm_details  = new real[num_details];
+	int*  sig_details   = new int[num_details](); 
+	int*  dry_cells     = new int[num_fine_cells + 2];
+	real* eta_temp      = new real[num_fine_cells + 2];
+	real* delta_west    = new real[num_fine_cells + 1];
+	real* delta_east    = new real[num_fine_cells + 1];
 
 	// =========================================================== //
 
@@ -314,21 +292,20 @@ int main()
 			total_mass
 		);
 
-		steps++;
-
-		printf("Length: %d, step: %d, time step: %.15f, mass: %.1f, progress: %.17f%%\n", assem_sol.length, steps, dt, total_mass, timeNow / sim_params.simulationTime * 100);
+		printf
+		(
+			"Length: %d, step: %d, time step: %.15f, mass: %.1f, progress: %.17f%%\n",
+			assem_sol.length, ++steps, dt, total_mass, timeNow / sim_params.simulationTime * 100
+		);
 	}
 
-	// delete buffers
-	free_nodal_values(nodal_vals);
-	free_assembled_solution(assem_sol);
-	free_face_values(face_vals);
-	free_star_values(star_vals);
-	free_bar_values(bar_vals);
-	free_fluxes(fluxes);
-	free_scale_coefficients(scale_coeffs);
-	free_details(details);
+	write_solution_to_file
+	(
+		sim_params, 
+		assem_sol
+	);
 
+	// delete buffers
 	delete[] x_coarse;
 	delete[] dx_flattened;
 	delete[] x_coords;

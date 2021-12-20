@@ -17,6 +17,8 @@ void decoding
 	FlattenedDetails      details
 )
 {
+	if (assem_sol.is_copy) printf("Hello\n");
+	
 	// reset since passing by reference
 	assem_sol.length = 0;
 

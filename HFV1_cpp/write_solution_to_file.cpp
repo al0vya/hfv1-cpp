@@ -3,23 +3,30 @@
 void write_solution_to_file
 (
 	SimulationParameters& sim_params, 
-	NodalValues&          nodal_vals, 
 	AssembledSolution&    assem_sol
 )
 {
+	real x1 = C(0.0);
+	real x2 = C(0.0);
+
 	std::ofstream test;
 
 	test.open("solution_data.csv");
 
-	test << "x,q,z,eta" << std::endl;
+	test << "x1,x2,q,z,eta" << std::endl;
 
-	for (int i = 0; i < sim_params.cells; i++)
+	for (int i = 0; i < assem_sol.length; i++)
 	{
-		test << (nodal_vals.x[i] + nodal_vals.x[i + 1]) / 2 << "," 
+		x2 += assem_sol.dx_BC[i + 1];
+
+		test << x1 << "," 
+		     << x2 << "," 
 			 << assem_sol.q_BC[i + 1] << "," 
 			 << assem_sol.z_BC[i + 1] << "," 
 			 << std::max(assem_sol.z_BC[i + 1], assem_sol.h_BC[i + 1] + assem_sol.z_BC[i + 1]) 
 			 << std::endl;
+
+		x1 += assem_sol.dx_BC[i + 1];
 	}
 
 	test.close();

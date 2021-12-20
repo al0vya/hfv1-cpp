@@ -1,5 +1,5 @@
 #include "traverse_tree_decode.h"
-
+#include <cstdio>
 void traverse_tree_decode
 (
 	SolverParameters solverParameters,
@@ -23,6 +23,8 @@ void traverse_tree_decode
 	AssembledSolution& assembledSolution
 )
 {
+	if (assembledSolution.is_copy) printf("Hello\n");
+	
 	// initially, n = 0 and k = 0 i.e. the coarsest sub-element
 	int currentLevStart = (1 << n) - 1;
 	int currentLevEnd = (1 << (n + 1)) - 2;

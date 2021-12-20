@@ -27,4 +27,5 @@ void traverse_tree_decode(
 
 	int* significantDetails,
 
-	AssembledSolution &assembledSolution);
+	AssembledSolution& assembledSolution
+);
