@@ -34,12 +34,12 @@ int main
 	char** argv
 )
 {
-	if (argc < 5)
+	if (argc < 6)
 	{
 		printf
 		(
 			"Please run in the command line as follows:\n\n"
-			"HFV1_cpp.exe <TEST_CASE> <NUM_CELLS> <MAX_REF_LVL> <EPSILON>"
+			"HFV1_cpp.exe <TEST_CASE> <NUM_CELLS> <MAX_REF_LVL> <EPSILON> <SAVE_INT>"
 		);
 
 		exit(-1);
@@ -51,6 +51,7 @@ int main
 	int  num_cells        = strtol(argv[2], nullptr, 10); //set_num_cells();
 	int  refinement_level = strtol(argv[3], nullptr, 10); //set_max_refinement_lvl();
 	real epsilon          = strtof(argv[4], nullptr    ); //set_error_threshold_epsilon();
+	real interval         = strtof(argv[5], nullptr    ); //set_error_threshold_epsilon();
 
 	clock_t start = clock();
 
@@ -76,7 +77,7 @@ int main
 	real dx_fine = dx_coarse / (1 << solver_params.L);
 
 	bool first_time_step = true;
-	real timeNow = 0;
+	real time_now = 0;
 	real dt = C(1e-4);
 
 	NodalValues          nodal_vals(num_fine_cells + 1);
@@ -88,6 +89,7 @@ int main
 	FlattenedScaleCoeffs scale_coeffs(num_scale_coeffs);
 	FlattenedDetails     details(num_details);
 	Maxes                maxes = { 0, 0, 0 };
+	SaveInterval         saveint = { interval };
 
 	// Arrays
 	real* dx_flattened  = new real[num_scale_coeffs];
@@ -132,15 +134,15 @@ int main
 		scale_coeffs
 	);
 
-	while (timeNow < sim_params.simulationTime)
+	while (time_now < sim_params.simulationTime)
 	{
-		timeNow += dt;
+		time_now += dt;
 
-		if (timeNow - sim_params.simulationTime > 0)
+		if (time_now - sim_params.simulationTime > 0)
 		{
-			timeNow -= dt;
-			dt = sim_params.simulationTime - timeNow;
-			timeNow += dt;
+			time_now -= dt;
+			dt = sim_params.simulationTime - time_now;
+			time_now += dt;
 		}
 
 		maxes = get_max_scale_coefficients
@@ -280,18 +282,22 @@ int main
 			total_mass
 		);
 
+		if ( saveint.save(time_now) )
+		{
+			write_solution_to_file
+			(
+				sim_params,
+				assem_sol,
+				saveint
+			);
+		}
+
 		printf
 		(
 			"Length: %d, step: %d, time step: %.15f, mass: %.1f, progress: %.17f%%\n",
-			assem_sol.length, ++steps, dt, total_mass, timeNow / sim_params.simulationTime * 100
+			assem_sol.length, ++steps, dt, total_mass, time_now / sim_params.simulationTime * 100
 		);
 	}
-
-	write_solution_to_file
-	(
-		sim_params, 
-		assem_sol
-	);
 
 	// delete buffers
 	delete[] x_coarse;

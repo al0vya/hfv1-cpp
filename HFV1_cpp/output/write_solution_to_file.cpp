@@ -3,17 +3,20 @@
 void write_solution_to_file
 (
 	SimulationParameters& sim_params, 
-	AssembledSolution&    assem_sol
+	AssembledSolution&    assem_sol,
+	SaveInterval&         saveint
 )
 {
-	real x1 = C(0.0);
-	real x2 = C(0.0);
-
+	std::string filename = "solution_data-" + std::to_string(saveint.count - 1) + ".csv";
+	
 	std::ofstream test;
 
-	test.open("solution_data.csv");
+	test.open(filename);
 
 	test << "x1,x2,q,z,eta" << std::endl;
+
+	real x1 = C(0.0);
+	real x2 = C(0.0);
 
 	for (int i = 0; i < assem_sol.length; i++)
 	{

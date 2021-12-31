@@ -263,6 +263,9 @@
     <ClInclude Include="classes\StarValues.h">
       <Filter>Source Files\classes</Filter>
     </ClInclude>
+    <ClInclude Include="classes\SaveInterval.h">
+      <Filter>Source Files\classes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="mra\decodeWithVector_pastebin.txt">
