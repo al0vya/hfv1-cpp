@@ -40,5 +40,5 @@ The model supports 7 in-built tests as shown below.
 
 ### Triangular dam break
 
-<img src="HFV1_cpp/triangle-dam-break.gif" width="50%" height="50%">
+<img src="HFV1_cpp/triangle-dam-break-eta.gif" width="50%" height="50%">
 
