@@ -28,11 +28,11 @@ The model supports 7 in-built tests as shown below.
 
 ### Wet c-property
 
-<img src="HFV1_cpp/wet-c-property-q.gif" width="50%" height="50%">
+<img src="HFV1_cpp/wet-c-prop-q.gif" width="50%" height="50%">
 
 ### Wet/dry c-property
 
-<img src="HFV1_cpp/wet-dry-c-property-q.gif" width="50%" height="50%">
+<img src="HFV1_cpp/wet-dry-c-prop-q.gif" width="50%" height="50%">
 
 ### Building overtopping
 
@@ -40,5 +40,5 @@ The model supports 7 in-built tests as shown below.
 
 ### Triangular dam break
 
-<img src="HFV1_cpp/triangular-dam-break.gif" width="50%" height="50%">
+<img src="HFV1_cpp/triangle-dam-break.gif" width="50%" height="50%">
 
