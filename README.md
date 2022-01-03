@@ -1,5 +1,9 @@
 # HFV1_cpp
 
+## About
+
+This project is a shallow water model that is based on [this paper](https://www.sciencedirect.com/science/article/pii/S0309170819301770).
+
 To use this model you need to have [Visual Studio 2019](https://visualstudio.microsoft.com/downloads/) or higher. You also need to have [Python](https://www.python.org/downloads/).
 
 ## Building the model executable
