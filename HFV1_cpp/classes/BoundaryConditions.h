@@ -6,18 +6,6 @@ typedef struct BoundaryConditions
 	real hl;
 	real hr;
 
-	real ql;
-	real qr;
-
-	real reflect_up;
-	real reflect_down;
-
-	real h_imposed_up;
-	real q_imposed_up;
-
-	real h_imposed_down;
-	real q_imposed_down;
-
 } BoundaryConditions;
 
 /*

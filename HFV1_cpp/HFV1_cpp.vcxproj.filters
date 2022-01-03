@@ -126,6 +126,9 @@
     <ClCompile Include="MAIN.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="operator\bed_data_triangle.cpp">
+      <Filter>Source Files\operator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="operator\add_ghost_cells.h">
@@ -265,6 +268,9 @@
     </ClInclude>
     <ClInclude Include="classes\SaveInterval.h">
       <Filter>Source Files\classes</Filter>
+    </ClInclude>
+    <ClInclude Include="operator\bed_data_triangle.h">
+      <Filter>Source Files\operator</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

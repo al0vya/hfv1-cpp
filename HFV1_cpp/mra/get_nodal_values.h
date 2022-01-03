@@ -5,6 +5,7 @@
 #include "../classes/BoundaryConditions.h"
 #include "../operator/h_init_c_property.h"
 #include "../operator/h_init_overtop.h"
+#include "../operator/bed_data_triangle.h"
 #include "../operator/bed_data_c_property.h"
 
 void get_nodal_values

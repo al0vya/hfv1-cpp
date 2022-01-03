@@ -50,6 +50,7 @@
     <ClCompile Include="operator\get_wet_dry_cells.cpp" />
     <ClCompile Include="operator\h_init_c_property.cpp" />
     <ClCompile Include="operator\h_init_overtop.cpp" />
+    <ClCompile Include="operator\bed_data_triangle.cpp" />
     <ClCompile Include="output\write_solution_to_file.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -98,6 +99,7 @@
     <ClInclude Include="operator\get_wet_dry_cells.h" />
     <ClInclude Include="operator\h_init_c_property.h" />
     <ClInclude Include="operator\h_init_overtop.h" />
+    <ClInclude Include="operator\bed_data_triangle.h" />
     <ClInclude Include="output\write_solution_to_file.h" />
   </ItemGroup>
   <ItemGroup>

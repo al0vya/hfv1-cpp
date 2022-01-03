@@ -43,8 +43,7 @@ def EXIT_HELP():
     help_message = (
         "Use as:\n\n" +
         "    python test.py test <MODE> <NUM_CELLS> <REFINEMENT_LEVEL> <EPSILON> <SAVE_INT>\n\n" +
-        "        MODE     : [debug,release]\n"
-        "        SAVE_INT : interval in seconds that the solution data are saved\n\n"
+        "        MODE     : [debug,release]\n\n"
         "    python test.py run <MODE> <TEST_CASE> <NUM_CELLS> <REFINEMENT_LEVEL> <EPSILON> <SAVE_INT>\n\n" +
         "        MODE      : [debug,release]\n" +
         "        TEST_CASE : [1,2,3,4,5,6]\n" +
@@ -72,6 +71,7 @@ test_names = [
     "wet-c-prop",
     "wet-dry-c-prop",
     "building-overtopping",
+    "triangle-dam-break"
 ]
 
 sim_times = [
@@ -80,13 +80,43 @@ sim_times = [
     1.3,
     0.5,
     0.5,
-    10
+    10,
+    29.6
 ]
+
+class Limits:
+    def __init__(
+            self,
+            intervals
+        ):
+            eta = []
+            q   = []
+            z   = []
+            
+            for interval in range(intervals):
+                filename  = "solution_data-" + str(interval) + ".csv"
+                
+                dataframe = pd.read_csv(filename)
+                
+                eta += dataframe["eta"].tolist()
+                q   += dataframe["q"].tolist()
+                z   += dataframe["z"].tolist()
+                
+            self.eta_max = np.max(eta)
+            self.q_max   = np.max(q)
+            self.z_max   = np.max(z)
+            
+            self.eta_min = np.min(eta)
+            self.q_min   = np.min(q)
+            self.z_min   = np.min(z)
 
 def plot_soln(
         x1,
         x2,
         y,
+        topo,
+        ylim,
+        topolim,
         quantity,
         interval,
         length,
@@ -98,13 +128,15 @@ def plot_soln(
         
         xlim = [ np.amin(x1), np.amax(x2) ]
         
-        ylim = [np.amin(y) * 0.98, np.amax(y) * 1.02]
+        topo_scale_factor = ylim[1] / topolim[1]
+        topo_scaled       = ( topo * topo_scale_factor + ylim[0] ) / 2
         
         for i in range(length):
-            plt.plot( [ x1[i], x2[i] ], [ y[i], y[i] ], color='b', linewidth="1.5" )    
+            plt.plot( [ x1[i], x2[i] ], [ y[i], y[i] ],                     color='b', linewidth=1.5 )    
+            plt.plot( [ x1[i], x2[i] ], [ topo_scaled[i], topo_scaled[i] ], color='k', linewidth=1.5 )    
             
         plt.xlim(xlim)
-        plt.ylim(ylim)
+        plt.ylim( 0.98 * ylim[0], 1.02 * ylim[1] )
         plt.xlabel("$x \, (m)$")
         plt.ylabel(ylabel)
         plt.savefig(filename, bbox_inches="tight")
@@ -140,13 +172,18 @@ class Solution:
         self.length = self.x1.size
         
     def plot_soln(
-        self
+        self,
+        limits
     ):
         print("Plotting solution " + str(self.interval) + "...")
         
-        plot_soln(self.x1, self.x2, self.q,   "q",   self.interval, self.length, "$q \, (m^2s^{-1})$", self.test_num, self.test_name)
-        plot_soln(self.x1, self.x2, self.eta, "eta", self.interval, self.length, "$\eta \, (m)$", self.test_num, self.test_name)
-        plot_soln(self.x1, self.x2, self.z,   "z",   self.interval, self.length, "$z \, (m)$", self.test_num, self.test_name)
+        qlim   = (limits.q_min,   limits.q_max)
+        etalim = (limits.eta_min, limits.eta_max)
+        zlim   = (limits.z_min,   limits.z_max)
+        
+        plot_soln(self.x1, self.x2, self.q,   self.z, qlim,   zlim, "q",   self.interval, self.length, "$q \, (m^2s^{-1})$", self.test_num, self.test_name)
+        plot_soln(self.x1, self.x2, self.eta, self.z, etalim, zlim, "eta", self.interval, self.length, "$\eta \, (m)$", self.test_num, self.test_name)
+        plot_soln(self.x1, self.x2, self.z,   self.z, zlim,   zlim, "z",   self.interval, self.length, "$z \, (m)$", self.test_num, self.test_name)
 
 def animate():
     images = []
@@ -185,15 +222,15 @@ def run():
         
         intervals = int( sim_times[int(test) - 1] / float(saveint) )
         
-        [ Solution(mode, interval, test, test_names[int(test) - 1]).plot_soln() for interval in range(intervals) ]
+        [ Solution(mode, interval, test, test_names[int(test) - 1]).plot_soln( Limits(intervals) ) for interval in range(intervals) ]
     else:
         EXIT_HELP()
         
 def run_tests():
     print("Attempting to run all tests...")
     
-    if len(sys.argv) > 6:
-        dummy, action, mode, num_cells, max_ref_lvl, epsilon, saveint = sys.argv
+    if len(sys.argv) > 5:
+        dummy, action, mode, num_cells, max_ref_lvl, epsilon = sys.argv
         
         if   mode == "debug":
             solver_file = os.path.join(os.path.dirname(__file__), "..", "x64", "Debug", "HFV1_cpp.exe")
@@ -205,8 +242,8 @@ def run_tests():
         tests = [1, 2, 3, 4, 5, 6]
         
         for i, test in enumerate(tests):
-            subprocess.run( [solver_file, str(test), num_cells, max_ref_lvl, epsilon] )
-            Solution(mode, test, test_names[i]).plot_soln()
+            subprocess.run( [ solver_file, str(test), num_cells, max_ref_lvl, epsilon, sim_times[i] ] )
+            Solution( mode, test, test_names[i] ).plot_soln( Limits(intervals) )
     else:
         EXIT_HELP()
 

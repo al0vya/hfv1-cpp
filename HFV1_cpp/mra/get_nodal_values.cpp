@@ -19,9 +19,9 @@ void get_nodal_values
 	case 3:
 		for (int i = 0; i < num_fine_cells + 1; i++)
 		{
-			nodal_vals.z[i] = 0;
+			nodal_vals.z[i] = C(0.0);
 			nodal_vals.h[i] = h_init_overtop(bcs, nodal_vals.z[i], nodal_vals.x[i]);
-			nodal_vals.q[i] = (nodal_vals.x[i] <= 32.5) ? bcs.ql : bcs.qr;
+			nodal_vals.q[i] = C(0.0);
 		}
 		break;
 	case 4:
@@ -30,7 +30,7 @@ void get_nodal_values
 		{
 			nodal_vals.z[i] = bed_data_c_property(nodal_vals.x[i]);
 			nodal_vals.h[i] = h_init_c_property(bcs, nodal_vals.z[i], nodal_vals.x[i]);
-			nodal_vals.q[i] = (nodal_vals.x[i] <= 32.5) ? bcs.ql : bcs.qr;
+			nodal_vals.q[i] = C(0.0);
 		}
 		break;
 	case 6:
@@ -38,7 +38,15 @@ void get_nodal_values
 		{
 			nodal_vals.z[i] = bed_data_c_property(nodal_vals.x[i]);
 			nodal_vals.h[i] = h_init_overtop(bcs, nodal_vals.z[i], nodal_vals.x[i]);
-			nodal_vals.q[i] = (nodal_vals.x[i] <= 32.5) ? bcs.ql : bcs.qr;
+			nodal_vals.q[i] = C(0.0);
+		}
+		break;
+	case 7:
+		for (int i = 0; i < num_fine_cells + 1; i++)
+		{
+			nodal_vals.z[i] = bed_data_triangle(nodal_vals.x[i]);
+			nodal_vals.h[i] = ( nodal_vals.x[i] < C(15.5) ) ? C(0.75) : C(0.0);;
+			nodal_vals.q[i] = C(0.0);
 		}
 		break;
 	default:
