@@ -12,7 +12,7 @@ Navigate to `HFV1_cpp\HFV1_cpp` using File Explorer. Click into the search bar o
 
 ## In-built test cases
 
-The model supports 7 in-built tests as shown below.
+The model supports 7 in-built tests. The outputs from each test are shown in the animations below. The animations can be used to check for correctness if the model is modified in any way. 
 
 ### Wet dam break
 
@@ -41,4 +41,3 @@ The model supports 7 in-built tests as shown below.
 ### Triangular dam break
 
 <img src="HFV1_cpp/triangle-dam-break-eta.gif" width="50%" height="50%">
-
