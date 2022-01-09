@@ -29,8 +29,8 @@ void fluxHLL
 
 			real aStar = sqrt(solverParameters.g * hStar);
 
-			real sWest = (star_vals.h_west[i] <= solverParameters.tol_dry) ? uEast - 2 * aEast : min(uWest - aWest, uStar - aStar);
-			real sEast = (star_vals.h_east[i] <= solverParameters.tol_dry) ? uWest + 2 * aWest : max(uEast + aEast, uStar + aStar);
+			real sWest = (star_vals.h_west[i] <= solverParameters.tol_dry) ? uEast - 2 * aEast : std::fmin(uWest - aWest, uStar - aStar);
+			real sEast = (star_vals.h_east[i] <= solverParameters.tol_dry) ? uWest + 2 * aWest : std::fmax(uEast + aEast, uStar + aStar);
 
 			real massWest = star_vals.q_west[i];
 			real massEast = star_vals.q_east[i];

@@ -71,10 +71,10 @@ void encoding
 	{
 		sig_details[i] = false;
 
-		real a = abs(details.q[i]) / maxes.q;
-		real b = abs(details.eta[i]) / maxes.eta;
-		real c = abs(details.z[i]) / maxes.z;
+		real a = std::abs(details.q[i]) / maxes.q;
+		real b = std::abs(details.eta[i]) / maxes.eta;
+		real c = std::abs(details.z[i]) / maxes.z;
 
-		norm_details[i] = std::max(a, std::max(b, c));
+		norm_details[i] = std::fmax(a, std::fmax(b, c));
 	}
 }

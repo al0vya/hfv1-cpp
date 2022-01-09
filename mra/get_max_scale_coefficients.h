@@ -1,6 +1,6 @@
 #pragma once
 
-#include <algorithm>
+#include <cmath>
 
 #include "Maxes.h"
 #include "AssembledSolution.h"

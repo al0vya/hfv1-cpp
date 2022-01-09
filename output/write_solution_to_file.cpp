@@ -26,7 +26,7 @@ void write_solution_to_file
 		     << x2 << "," 
 			 << assem_sol.q_BC[i + 1] << "," 
 			 << assem_sol.z_BC[i + 1] << "," 
-			 << std::max(assem_sol.z_BC[i + 1], assem_sol.h_BC[i + 1] + assem_sol.z_BC[i + 1]) 
+			 << std::fmax(assem_sol.z_BC[i + 1], assem_sol.h_BC[i + 1] + assem_sol.z_BC[i + 1]) 
 			 << std::endl;
 
 		x1 += assem_sol.dx_BC[i + 1];

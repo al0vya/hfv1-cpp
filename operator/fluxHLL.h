@@ -1,6 +1,6 @@
 #pragma once
 #include <cmath>
-#include <algorithm>
+#include <cmath>
 
 using namespace std;
 
