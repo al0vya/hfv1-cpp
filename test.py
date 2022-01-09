@@ -43,9 +43,9 @@ def EXIT_HELP():
     help_message = (
         "Use as:\n\n" +
         "    python test.py test <MODE> <NUM_CELLS> <REFINEMENT_LEVEL> <EPSILON> <SAVE_INT>\n\n" +
-        "        MODE     : [debug,release]\n\n"
+        "        MODE     : [debug,release,linux]\n\n"
         "    python test.py run <MODE> <TEST_CASE> <NUM_CELLS> <REFINEMENT_LEVEL> <EPSILON> <SAVE_INT>\n\n" +
-        "        MODE      : [debug,release]\n" +
+        "        MODE      : [debug,release,linux]\n" +
         "        TEST_CASE : [1,2,3,4,5,6]\n" +
         "        SAVE_INT  : interval in seconds that the solution data are saved\n\n"
         "    Available test cases:\n" +
@@ -58,6 +58,18 @@ def EXIT_HELP():
     )
     
     sys.exit(help_message)
+
+def set_path(mode):
+    if mode == "debug":
+        path = os.path.join(os.path.dirname(__file__), "out", "build", "x64-Debug")
+    elif mode == "release":
+        path = os.path.join(os.path.dirname(__file__), "out", "build", "x64-Release")
+    elif mode == "linux":
+        path = os.path.join(os.path.dirname(__file__), "build")
+    else:
+        EXIT_HELP()
+        
+    return path
 
 def clear_jpg_files():
     path = os.path.dirname(__file__)
@@ -211,10 +223,14 @@ def run():
     if len(sys.argv) > 7:
         dummy, action, mode, test, num_cells, max_ref_lvl, epsilon, saveint = sys.argv
         
+        path = set_path(mode)
+        
+        print("Trying to find executable in " + path)
+        
         if   mode == "debug":
-            solver_file = os.path.join(os.path.dirname(__file__), "..", "x64", "Debug", "HFV1_cpp.exe")
+            solver_file = os.path.join(path, "hfv1-cpp.exe")
         elif mode == "release":
-            solver_file = os.path.join(os.path.dirname(__file__), "..", "x64", "Release", "HFV1_cpp.exe")
+            solver_file = os.path.join(path, "hfv1-cpp.exe")
         else:
             EXIT_HELP()
         
@@ -232,18 +248,22 @@ def run_tests():
     if len(sys.argv) > 5:
         dummy, action, mode, num_cells, max_ref_lvl, epsilon = sys.argv
         
+        path = set_path(mode)
+        
+        print("Trying to find executable in " + path)
+        
         if   mode == "debug":
-            solver_file = os.path.join(os.path.dirname(__file__), "..", "x64", "Debug", "HFV1_cpp.exe")
+            solver_file = os.path.join(path, "hfv1-cpp.exe")
         elif mode == "release":
-            solver_file = os.path.join(os.path.dirname(__file__), "..", "x64", "Release", "HFV1_cpp.exe")
+            solver_file = os.path.join(path, "hfv1-cpp.exe")
         else:
             EXIT_HELP()
         
         tests = [1, 2, 3, 4, 5, 6]
         
         for i, test in enumerate(tests):
-            subprocess.run( [ solver_file, str(test), num_cells, max_ref_lvl, epsilon, sim_times[i] ] )
-            Solution( mode, test, test_names[i] ).plot_soln( Limits(intervals) )
+            subprocess.run( [ solver_file, str(test), num_cells, max_ref_lvl, epsilon, str( sim_times[i] ) ] )
+            Solution( mode, 1, test, test_names[i] ).plot_soln( Limits(1) )
     else:
         EXIT_HELP()
 
