@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../classes/SimulationParameters.h"
-#include "../classes/SolverParameters.h"
+#include "SimulationParameters.h"
+#include "SolverParameters.h"
 
 void regularisation
 (

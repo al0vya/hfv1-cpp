@@ -4,11 +4,11 @@
 
 using namespace std;
 
-#include "../classes/real.h"
-#include "../classes/AssembledSolution.h"
-#include "../classes/SolverParameters.h"
-#include "../classes/StarValues.h"
-#include "../classes/Fluxes.h"
+#include "real.h"
+#include "AssembledSolution.h"
+#include "SolverParameters.h"
+#include "StarValues.h"
+#include "Fluxes.h"
 
 void fluxHLL
 (

@@ -3,9 +3,9 @@
 #include <fstream>
 #include <string>
 
-#include "../classes/SimulationParameters.h"
-#include "../classes/AssembledSolution.h"
-#include "../classes/SaveInterval.h"
+#include "SimulationParameters.h"
+#include "AssembledSolution.h"
+#include "SaveInterval.h"
 
 void write_solution_to_file
 (

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../classes/real.h"
-#include "../classes/SolverParameters.h"
+#include "real.h"
+#include "SolverParameters.h"
 #include "decode1.h"
 #include "decode2.h"
-#include "../classes/AssembledSolution.h"
-#include "../classes/FlattenedDetails.h"
-#include "../classes/FlattenedScaleCoeffs.h"
+#include "AssembledSolution.h"
+#include "FlattenedDetails.h"
+#include "FlattenedScaleCoeffs.h"
 
 void traverse_tree_decode(
 	SolverParameters solverParameters,
