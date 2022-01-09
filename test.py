@@ -27,7 +27,7 @@ def natural_keys(text):
     return [ atoi(c) for c in re.split(r'(\d+)', text) ]
 
 def get_filenames_natural_order():
-    path = os.path.dirname(__file__)
+    path = os.path.dirname( os.path.abspath(__file__) )
     
     filenames_natural_order = os.listdir(path)
     
@@ -46,7 +46,7 @@ def EXIT_HELP():
         "        MODE     : [debug,release,linux]\n\n"
         "    python test.py run <MODE> <TEST_CASE> <NUM_CELLS> <REFINEMENT_LEVEL> <EPSILON> <SAVE_INT>\n\n" +
         "        MODE      : [debug,release,linux]\n" +
-        "        TEST_CASE : [1,2,3,4,5,6]\n" +
+        "        TEST_CASE : [1,2,3,4,5,6]\n" +     
         "        SAVE_INT  : interval in seconds that the solution data are saved\n\n"
         "    Available test cases:\n" +
         "        1. Wet dam break\n" +
@@ -61,18 +61,18 @@ def EXIT_HELP():
 
 def set_path(mode):
     if mode == "debug":
-        path = os.path.join(os.path.dirname(__file__), "out", "build", "x64-Debug")
+        path = os.path.join(os.path.dirname( os.path.abspath(__file__) ), "out", "build", "x64-Debug")
     elif mode == "release":
-        path = os.path.join(os.path.dirname(__file__), "out", "build", "x64-Release")
+        path = os.path.join(os.path.dirname( os.path.abspath(__file__) ), "out", "build", "x64-Release")
     elif mode == "linux":
-        path = os.path.join(os.path.dirname(__file__), "build")
+        path = os.path.join(os.path.dirname( os.path.abspath(__file__) ), "build")
     else:
         EXIT_HELP()
         
     return path
 
 def clear_jpg_files():
-    path = os.path.dirname(__file__)
+    path = os.path.dirname( os.path.abspath(__file__) )
     
     [ os.remove(filename) for filename in os.listdir(path) if filename.endswith(".jpg") ]
 
@@ -164,7 +164,7 @@ class Solution:
     ):
         print("Initialising solution...")
         
-        if mode != "debug" and mode != "release":
+        if mode != "debug" and mode != "release" and mode != "linux":
             EXIT_HELP()
         
         self.interval  = interval
@@ -194,8 +194,8 @@ class Solution:
         zlim   = (limits.z_min,   limits.z_max)
         
         plot_soln(self.x1, self.x2, self.q,   self.z, qlim,   zlim, "q",   self.interval, self.length, "$q \, (m^2s^{-1})$", self.test_num, self.test_name)
-        plot_soln(self.x1, self.x2, self.eta, self.z, etalim, zlim, "eta", self.interval, self.length, "$\eta \, (m)$", self.test_num, self.test_name)
-        plot_soln(self.x1, self.x2, self.z,   self.z, zlim,   zlim, "z",   self.interval, self.length, "$z \, (m)$", self.test_num, self.test_name)
+        plot_soln(self.x1, self.x2, self.eta, self.z, etalim, zlim, "eta", self.interval, self.length, "$\eta \, (m)$",      self.test_num, self.test_name)
+        plot_soln(self.x1, self.x2, self.z,   self.z, zlim,   zlim, "z",   self.interval, self.length, "$z \, (m)$",         self.test_num, self.test_name)
 
 def animate():
     images = []
@@ -227,10 +227,8 @@ def run():
         
         print("Trying to find executable in " + path)
         
-        if   mode == "debug":
-            solver_file = os.path.join(path, "hfv1-cpp.exe")
-        elif mode == "release":
-            solver_file = os.path.join(path, "hfv1-cpp.exe")
+        if mode == "debug" or mode == "release" or mode == "linux":
+            solver_file = os.path.join(path, "hfv1-cpp" if mode == "linux" else "hfv1-cpp.exe")
         else:
             EXIT_HELP()
         
@@ -252,10 +250,8 @@ def run_tests():
         
         print("Trying to find executable in " + path)
         
-        if   mode == "debug":
-            solver_file = os.path.join(path, "hfv1-cpp.exe")
-        elif mode == "release":
-            solver_file = os.path.join(path, "hfv1-cpp.exe")
+        if mode == "debug" or mode == "release" or mode == "linux":
+            solver_file = os.path.join(path, "hfv1-cpp" if mode == "linux" else "hfv1-cpp.exe")
         else:
             EXIT_HELP()
         
@@ -284,11 +280,11 @@ if len(sys.argv) > 1:
     
     if action == "run":
         run()
+        animate()
     elif action == "test":
         run_tests()
     else:
         EXIT_HELP()
         
-    animate()
 else:
     EXIT_HELP()
